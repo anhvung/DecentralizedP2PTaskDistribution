@@ -1,5 +1,6 @@
 breed [brains brain]
-globals [types]
+brains-own [available mytask ptask1 ptask2 ]
+globals [types type1 type2 numberoftask1 numberoftask2 starttingpoint]
 to setup
   clear-all
   ca
@@ -19,6 +20,73 @@ to setup
       create-link-with one-of other brains
     ]
   ]
+
+  ask brains[
+    set available 0
+    set mytask 0
+    set ptask1 -1
+    set ptask2 -1
+    set label "free"
+    set label-color black
+  ]
+
+  set type1 number-type1
+  set type2 number-type2
+
+  set numberoftask1 0
+  set numberoftask2 0
+
+  set starttingpoint one-of brains
+
+  ask starttingpoint[
+    set ptask1 (type1 / (type1 + type2))
+    set ptask2 (type2 / (type1 + type2))
+    update-target self ptask1 ptask2
+  ]
+
+
+  reset-ticks
+end
+
+to go
+  ask brains[
+    let target one-of out-link-neighbors
+    print target
+    if ptask2 >= 0[
+      print "updating"
+      update-target target ptask1 ptask2
+    ]
+
+
+  ]
+
+  tick
+end
+
+
+to update-target [myTarget myptask1 myptask2]
+  if myTarget != nobody[
+     ask myTarget[
+    if available = 0 [
+      ifelse  (random-float 1) > myptask1 [
+        set mytask 1
+        set numberoftask1 (numberoftask1 + 1)
+         set label "type2"
+
+      ]
+      [
+        set mytask 2
+        set numberoftask2 (numberoftask2 + 1)
+         set label "type1"
+
+      ]
+
+      set available 1
+    ]
+  ]
+  ]
+
+
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -66,27 +134,74 @@ NIL
 1
 
 SLIDER
-25
-204
-197
-237
+0
+156
+172
+189
 number-brains
 number-brains
 0
 100
-47.0
+16.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-51
-300
-223
-333
+5
+219
+177
+252
 number-connections
 number-connections
+0
+100
+100.0
+1
+1
+NIL
+HORIZONTAL
+
+BUTTON
+64
+314
+127
+347
+NIL
+go
+T
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+SLIDER
+3
+374
+175
+407
+number-type1
+number-type1
+0
+100
+29.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+5
+432
+177
+465
+number-type2
+number-type2
 0
 100
 50.0
@@ -94,6 +209,60 @@ number-connections
 1
 NIL
 HORIZONTAL
+
+PLOT
+25
+540
+225
+690
+Task 1
+Tick
+Task1
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot numberoftask1"
+
+PLOT
+34
+725
+234
+875
+Task 2
+Tick
+Task 2
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot numberoftask2"
+
+PLOT
+328
+570
+528
+720
+Distribution
+Time
+Ratio
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot (numberoftask1 / numberoftask2) * 100"
 
 @#$#@#$#@
 ## WHAT IS IT?
