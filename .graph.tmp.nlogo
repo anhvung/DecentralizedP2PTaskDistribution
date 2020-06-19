@@ -262,7 +262,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot (numberoftask1 / (numberoftask2 + numberoftask1)) * 100"
+"default" 1.0 0 -16777216 true "" "plot (numberoftask1 / numberoftask2 + numberoftask1) * 100"
 
 @#$#@#$#@
 ## WHAT IS IT?
