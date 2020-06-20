@@ -1,6 +1,6 @@
 breed [brains brain]
 brains-own [available mytask ptask1 ptask2 ]
-globals [types type1 type2 numberoftask1 numberoftask2 starttingpoint]
+globals [types type1 type2 numberoftask1 numberoftask2 starttingpoint visited ]
 to setup
   clear-all
   ca
@@ -8,36 +8,41 @@ to setup
     set pcolor white
   ]
   set types [red blue green]
-
+  ;CREATION DU GRAPHE
   create-brains number-brains[
     set shape "circle"
     setxy random-pxcor random-pycor
     set color one-of types
   ]
-
+  ;CREATION DU GRAPHE (Liens)
   repeat number-connections[
     ask one-of brains[
       create-link-with one-of other brains
     ]
   ]
+  ;complete-graph
 
+  ;Initialisation des agents
   ask brains[
     set available 0
     set mytask 0
     set ptask1 -1
     set ptask2 -1
-    set label "free"
+    ;set label "free"
+    set label who
     set label-color black
   ]
-
+  ;Nombre de types 1 et 2
   set type1 number-type1
   set type2 number-type2
-
+  ;Nombre d'agents qui traitent les différents types (0 au début)
   set numberoftask1 0
   set numberoftask2 0
 
+  ;Point d'entrée
   set starttingpoint one-of brains
 
+  ;Point d'entrée
   ask starttingpoint[
     set ptask1 (type1 / (type1 + type2))
     set ptask2 (type2 / (type1 + type2))
@@ -48,15 +53,68 @@ to setup
   reset-ticks
 end
 
-to go
-  ask brains[
-    let target one-of out-link-neighbors
-    print target
-    if ptask2 >= 0[
-      print "updating"
-      update-target target ptask1 ptask2
+to complete-graph   ;On complete pour avoir un graphe connexe
+  set visited  n-values number-brains [0]
+  let added-brain nobody
+  dfs 0
+  let index-a-1 []
+  let index-a-0 []
+  let index 0
+  while [index != length visited][
+
+
+
+    ifelse item index visited = 1[
+      set index-a-1 insert-item 0 index-a-1 index
+    ]
+    [
+      set index-a-0 insert-item 0 index-a-0 index
+    ]
+    set index index + 1
+  ]
+
+
+  let taille-comp-connexe length index-a-1
+
+  if taille-comp-connexe < number-brains[
+    let auhasard0 one-of index-a-0
+    let auhasard1 one-of index-a-1
+    ask brain auhasard1[
+      create-link-with brain auhasard0
+    ]
+     ask brain auhasard0[
+      create-link-with brain auhasard1
     ]
 
+    complete-graph
+  ]
+
+
+
+
+end
+
+
+to dfs [n] ;parcours en profondeur recusif
+  if item n visited = 0[
+    set visited replace-item n visited 1
+    ask brain n[
+      ask out-link-neighbors[;pour tous les voisins
+        dfs who
+      ]
+    ]
+  ]
+end
+to go
+  ask brains[
+    ;On choisit au hasard avec une probabilité uniforme un voisin avec lequel on va communiquer
+    let target one-of link-neighbors
+
+
+    if ptask2 >= 0[  ;Si il a une information à donner (Sinon pas la peine de communiquer)
+
+      update-target target ptask1 ptask2
+    ]
 
   ]
 
@@ -65,28 +123,37 @@ end
 
 
 to update-target [myTarget myptask1 myptask2]
-  if myTarget != nobody[
-     ask myTarget[
-    if available = 0 [
-      ifelse  (random-float 1) > myptask1 [
-        set mytask 1
-        set numberoftask1 (numberoftask1 + 1)
-         set label "type2"
+  ifelse myTarget != nobody[ ; au cas ou s'il n'y a pas de voisin
+    ask myTarget[
+      set ptask1 myptask1
+      set ptask2 myptask2
+      if available = 0 [ ; S'il n'est pas en train de traiter une task
+        ifelse  (random-float 1) > myptask1 [ ;Si on choisit task2
+          set mytask 2
+          set numberoftask2 (numberoftask2 + 1)
+          set label "type2"
 
+
+        ]
+        [;  ELSE Si on choisit task1
+          set mytask 1
+          set numberoftask1 (numberoftask1 + 1)
+          set label "type1"
+
+
+        ]
+
+        set available 1
       ]
-      [
-        set mytask 2
-        set numberoftask2 (numberoftask2 + 1)
-         set label "type1"
-
-      ]
-
-      set available 1
     ]
   ]
-  ]
+  [print "no voisin !!!"]
 
 
+end
+to-report occurrences [x the-list]
+  report reduce
+    [ [occurrence-count next-item] -> ifelse-value (next-item = x) [occurrence-count + 1] [occurrence-count] ] (fput 0 the-list)
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -156,8 +223,8 @@ SLIDER
 number-connections
 number-connections
 0
-10000
-4586.0
+1000
+103.0
 1
 1
 NIL
@@ -262,7 +329,41 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot (numberoftask1 / numberoftask2 + numberoftask1) * 100"
+"default" 1.0 0 -16777216 true "" "plot (numberoftask1 / (numberoftask2 + numberoftask1)) * 100"
+
+BUTTON
+69
+47
+187
+80
+NIL
+complete-graph\n
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+722
+82
+785
+115
+NIL
+stop\n
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
