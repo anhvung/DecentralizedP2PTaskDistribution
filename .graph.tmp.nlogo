@@ -20,7 +20,7 @@ to setup
       create-link-with one-of other brains
     ]
   ]
-  ;complete-graph
+  complete-graph
 
   ;Initialisation des agents
   ask brains[
@@ -184,10 +184,10 @@ ticks
 30.0
 
 BUTTON
-59
-92
-122
-125
+13
+63
+76
+96
 NIL
 setup\n
 NIL
@@ -201,10 +201,10 @@ NIL
 1
 
 SLIDER
-0
-156
-172
-189
+10
+109
+182
+142
 number-brains
 number-brains
 0
@@ -216,10 +216,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-5
-219
-177
-252
+10
+154
+182
+187
 number-connections
 number-connections
 0
@@ -231,10 +231,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-64
-314
-127
-347
+113
+63
+176
+96
 NIL
 go
 T
@@ -248,25 +248,25 @@ NIL
 1
 
 SLIDER
-3
-374
-175
-407
+12
+201
+184
+234
 number-type1
 number-type1
 0
 100
-51.0
+58.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-5
-432
-177
-465
+10
+240
+182
+273
 number-type2
 number-type2
 0
@@ -278,10 +278,10 @@ NIL
 HORIZONTAL
 
 PLOT
-25
-540
-225
-690
+7
+457
+207
+607
 Task 1
 Tick
 Task1
@@ -296,10 +296,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot numberoftask1"
 
 PLOT
-34
-725
-234
-875
+232
+460
+432
+610
 Task 2
 Tick
 Task 2
@@ -314,10 +314,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot numberoftask2"
 
 PLOT
-328
-570
-528
-720
+0
+284
+200
+434
 Distribution
 Time
 Ratio
@@ -330,23 +330,6 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot (numberoftask1 / (numberoftask2 + numberoftask1)) * 100"
-
-BUTTON
-69
-47
-187
-80
-NIL
-complete-graph\n
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
 
 BUTTON
 722
