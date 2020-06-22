@@ -15,9 +15,8 @@ to setup
 
   set type1 number-type1
   set type2 number-type2
-  ;IGNORER JE VAIS CHANGER + TARD Nombre d'agents qui traitent les différents types (0 au début)
-  set numberoftask1 0
-  set numberoftask2 0
+
+
   ;Point d'entrée
   set starttingpoint one-of brains
 
@@ -136,14 +135,12 @@ to update-target [myTarget receinved-info-tasks]
       if available = 0 [ ; S'il n'est pas en train de traiter une task
         ifelse  (random-float 1) > myptask1 [ ;Si on choisit task2
           set mytask 2
-          set numberoftask2 (numberoftask2 + 1)
           set color red
 
 
         ]
         [;  ELSE Si on choisit task1
           set mytask 1
-          set numberoftask1 (numberoftask1 + 1)
           set color blue
 
 
