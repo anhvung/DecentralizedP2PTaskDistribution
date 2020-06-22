@@ -137,14 +137,14 @@ to update-target [myTarget receinved-info-tasks]
         ifelse  (random-float 1) > myptask1 [ ;Si on choisit task2
           set mytask 2
           set numberoftask2 (numberoftask2 + 1)
-          set  "type2"
+          set color red
 
 
         ]
         [;  ELSE Si on choisit task1
           set mytask 1
           set numberoftask1 (numberoftask1 + 1)
-          set label "type1"
+          set color blue
 
 
         ]
@@ -299,7 +299,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot numberoftask1"
+"default" 1.0 0 -16777216 true "plot count brains with [color = blue]" "plot count brains with [color = blue]"
 
 PLOT
 8
@@ -317,7 +317,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot numberoftask2"
+"default" 1.0 0 -16777216 true "plot count brains with [color = blue]" "plot count brains with [color = blue]"
 
 PLOT
 860
@@ -335,15 +335,15 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot (numberoftask1 / (numberoftask2 + numberoftask1)) * 100"
+"default" 1.0 0 -16777216 true "" "plot 100 * count brains with [color = blue]/((count brains with [color = blue]) + (count brains with [color = red]))"
 
 MONITOR
 865
 16
-1164
+1498
 61
 NIL
-numberoftask1 / (numberoftask2 + numberoftask1)
+100 * count brains with [color = blue]/((count brains with [color = blue]) + (count brains with [color = red]))
 17
 1
 11
