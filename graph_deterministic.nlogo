@@ -1,6 +1,6 @@
 breed [brains brain]
 brains-own [available mytask info-tasks ]
-globals [types type1 type2 numberoftask1 numberoftask2 visited ]
+globals [types type1 type2 visited info]
 to setup
   clear-all
   ca
@@ -15,6 +15,11 @@ to setup
 
   set type1 number-type1
   set type2 number-type2
+  let ntask1 type1
+  let ntask2 type2
+  set info []
+  set info insert-item 0 info ntask2
+  set info insert-item 0 info ntask1
 
   reset-ticks
 end
@@ -76,10 +81,6 @@ to complete-graph   ;On complete pour avoir un graphe connexe
 
     complete-graph
   ]
-
-
-
-
 end
 
 
@@ -94,24 +95,19 @@ to dfs [n] ;parcours en profondeur recusif
   ]
 end
 to go
-  let ntask1 type1
-  let ntask2 type2
-  let intel []
-  set intel insert-item 0 intel ntask2
-  set intel insert-item 0 intel ntask1
   set visited  n-values number-brains [0]
-  propage 0 intel
+  propage 0 info
   tick
 end
 
-to propage [n intel]
+to propage [n intel] ;cette procédure s'inspire du dfs pour propager l'information
+  update-target brain n intel ;l'information est transmise sur l'agent actuel
   if item n visited = 0[
-    update-target brain n intel
     set visited replace-item n visited 1
     ask brain n[
       ask out-link-neighbors[
         propage who [info-tasks] of brain n
-        update-target brain n [info-tasks] of brain who
+        update-target brain n [info-tasks] of brain who ;l'information doit remonter à la source avant de se propager vers les autres voisins
       ]
     ]
   ]
@@ -146,6 +142,7 @@ to update-target [myTarget receinved-info-tasks]
         ]
         set available 1
       ]
+      set info-tasks []
       set info-tasks insert-item 0 info-tasks myntask2
       set info-tasks insert-item 0 info-tasks myntask1
     ]
