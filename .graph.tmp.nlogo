@@ -1,5 +1,5 @@
 breed [brains brain]
-brains-own [available mytask ptask1 ptask2 ]
+brains-own [available mytask info-tasks ]
 globals [types type1 type2 numberoftask1 numberoftask2 starttingpoint visited ]
 to setup
   clear-all
@@ -8,11 +8,44 @@ to setup
     set pcolor white
   ]
   set types [red blue green]
-  ;CREATION DU GRAPHE
+  ;CREATION DU GRAPHEAv
+  setup-graph
+  setup-agents
+
+
+  set type1 number-type1
+  set type2 number-type2
+  ;IGNORER JE VAIS CHANGER + TARD Nombre d'agents qui traitent les différents types (0 au début)
+  set numberoftask1 0
+  set numberoftask2 0
+  ;Point d'entrée
+  set starttingpoint one-of brains
+
+  ;Point d'entrée
+  ask starttingpoint[
+    let ptask1 (type1 / (type1 + type2))
+    let ptask2 (type2 / (type1 + type2))
+    set info-tasks insert-item 0 info-tasks ptask2
+     set info-tasks insert-item 0 info-tasks ptask1
+    update-target self info-tasks
+  ]
+
+
+  reset-ticks
+end
+to setup-agents
+   ask brains[
+    set available 0
+    set mytask 0
+    set info-tasks []
+    set label-color green
+  ]
+end
+to setup-graph
   create-brains number-brains[
     set shape "circle"
     setxy random-pxcor random-pycor
-    set color one-of types
+    set color green
   ]
   ;CREATION DU GRAPHE (Liens)
   repeat number-connections[
@@ -21,36 +54,6 @@ to setup
     ]
   ]
   complete-graph
-
-  ;Initialisation des agents
-  ask brains[
-    set available 0
-    set mytask 0
-    set ptask1 -1
-    set ptask2 -1
-    ;set label "free"
-    set label who
-    set label-color black
-  ]
-  ;Nombre de types 1 et 2
-  set type1 number-type1
-  set type2 number-type2
-  ;Nombre d'agents qui traitent les différents types (0 au début)
-  set numberoftask1 0
-  set numberoftask2 0
-
-  ;Point d'entrée
-  set starttingpoint one-of brains
-
-  ;Point d'entrée
-  ask starttingpoint[
-    set ptask1 (type1 / (type1 + type2))
-    set ptask2 (type2 / (type1 + type2))
-    update-target self ptask1 ptask2
-  ]
-
-
-  reset-ticks
 end
 
 to complete-graph   ;On complete pour avoir un graphe connexe
@@ -111,9 +114,9 @@ to go
     let target one-of link-neighbors
 
 
-    if ptask2 >= 0[  ;Si il a une information à donner (Sinon pas la peine de communiquer)
+    if length info-tasks > 0[  ;Si il a une information à donner (Sinon pas la peine de communiquer)
 
-      update-target target ptask1 ptask2
+      update-target target info-tasks
     ]
 
   ]
@@ -122,16 +125,19 @@ to go
 end
 
 
-to update-target [myTarget myptask1 myptask2]
+to update-target [myTarget receinved-info-tasks]
+  let myptask1 item 0 receinved-info-tasks
+  let myptask2 item 1 receinved-info-tasks
   ifelse myTarget != nobody[ ; au cas ou s'il n'y a pas de voisin
     ask myTarget[
-      set ptask1 myptask1
-      set ptask2 myptask2
+       set info-tasks insert-item 0 info-tasks myptask2
+       set info-tasks insert-item 0 info-tasks myptask1
+
       if available = 0 [ ; S'il n'est pas en train de traiter une task
         ifelse  (random-float 1) > myptask1 [ ;Si on choisit task2
           set mytask 2
           set numberoftask2 (numberoftask2 + 1)
-          set label "type2"
+          set  "type2"
 
 
         ]
@@ -157,13 +163,13 @@ to-report occurrences [x the-list]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-210
-10
-647
-448
+226
+58
+807
+640
 -1
 -1
-13.0
+17.364
 1
 10
 1
@@ -185,9 +191,9 @@ ticks
 
 BUTTON
 13
-63
+51
 76
-96
+84
 NIL
 setup\n
 NIL
@@ -208,8 +214,8 @@ SLIDER
 number-brains
 number-brains
 0
-100
-100.0
+1000
+293.0
 1
 1
 NIL
@@ -224,17 +230,17 @@ number-connections
 number-connections
 0
 1000
-103.0
+0.0
 1
 1
 NIL
 HORIZONTAL
 
 BUTTON
-113
-63
-176
-96
+118
+51
+181
+84
 NIL
 go
 T
@@ -256,7 +262,7 @@ number-type1
 number-type1
 0
 100
-58.0
+50.0
 1
 1
 NIL
@@ -296,10 +302,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot numberoftask1"
 
 PLOT
-232
-460
-432
-610
+8
+627
+208
+777
 Task 2
 Tick
 Task 2
@@ -314,10 +320,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot numberoftask2"
 
 PLOT
-0
-284
-200
-434
+860
+73
+1599
+701
 Distribution
 Time
 Ratio
@@ -331,35 +337,29 @@ false
 PENS
 "default" 1.0 0 -16777216 true "" "plot (numberoftask1 / (numberoftask2 + numberoftask1)) * 100"
 
-BUTTON
-722
-82
-785
-115
+MONITOR
+865
+16
+1164
+61
 NIL
-stop\n
-NIL
+numberoftask1 / (numberoftask2 + numberoftask1)
+17
 1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
 
-(a general understanding of what the model is trying to show or explain)
+Setup generates a simple graph showing a network of agents capable of solving tasks.
 
 ## HOW IT WORKS
 
-(what rules the agents use to create the overall behavior of the model)
+An entry point is determined randomly and will spread the information of the tasks. At each tick, each agent will randomly chose a neighbor to which to information will be sent.
 
 ## HOW TO USE IT
 
-(how to use the model, including a description of each of the items in the Interface tab)
+
 
 ## THINGS TO NOTICE
 
