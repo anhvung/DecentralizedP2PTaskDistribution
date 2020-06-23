@@ -1,25 +1,28 @@
 breed [brains brain]
 brains-own [available mytask ptask1 ptask2 ]
 globals [types type1 type2 numberoftask1 numberoftask2 starttingpoint visited ]
+
 to setup
   clear-all
-  ca
   ask patches[
     set pcolor white
   ]
   set types [red blue green]
-  ;CREATION DU GRAPHE
+
+  ;Creation du graphe
   create-brains number-brains[
     set shape "circle"
-    setxy random-pxcor random-pycor
+    setxy random 30 - 15 random 30 - 15
     set color one-of types
   ]
-  ;CREATION DU GRAPHE (Liens)
+
+  ;Creation du graphe (Liens)
   repeat number-connections[
     ask one-of brains[
       create-link-with one-of other brains
     ]
   ]
+
   complete-graph
 
   ;Initialisation des agents
@@ -32,6 +35,7 @@ to setup
     set label who
     set label-color black
   ]
+
   ;Nombre de types 1 et 2
   set type1 number-type1
   set type2 number-type2
@@ -49,7 +53,6 @@ to setup
     update-target self ptask1 ptask2
   ]
 
-
   reset-ticks
 end
 
@@ -61,9 +64,6 @@ to complete-graph   ;On complete pour avoir un graphe connexe
   let index-a-0 []
   let index 0
   while [index != length visited][
-
-
-
     ifelse item index visited = 1[
       set index-a-1 insert-item 0 index-a-1 index
     ]
@@ -89,9 +89,6 @@ to complete-graph   ;On complete pour avoir un graphe connexe
     complete-graph
   ]
 
-
-
-
 end
 
 
@@ -105,6 +102,7 @@ to dfs [n] ;parcours en profondeur recusif
     ]
   ]
 end
+
 to go
   ask brains[
     ;On choisit au hasard avec une probabilité uniforme un voisin avec lequel on va communiquer
@@ -209,7 +207,7 @@ number-brains
 number-brains
 0
 100
-100.0
+12.0
 1
 1
 NIL
@@ -224,7 +222,7 @@ number-connections
 number-connections
 0
 1000
-103.0
+561.0
 1
 1
 NIL
@@ -256,7 +254,7 @@ number-type1
 number-type1
 0
 100
-58.0
+50.0
 1
 1
 NIL
