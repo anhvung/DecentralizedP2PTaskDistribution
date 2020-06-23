@@ -27,6 +27,19 @@
         </tr>
     </tbody>
 </table>
+
+<table>
+    <thead>
+        <tr>
+            <th>Registres in/out</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Liste des répartitions voulues des tâches avec les tâches en index</td>
+        </tr>
+           </tbody>
+</table>
 *Hypothèses:*
 
 * -Le graphe est connexe
