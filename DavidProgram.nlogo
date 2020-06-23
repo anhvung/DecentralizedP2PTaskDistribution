@@ -1,174 +1,121 @@
 breed [brains brain]
-brains-own [available mytask info-tasks contains-update-agent parent-brain-id]
-globals [type1 type2 visited info]
-to setup
-  ca
-  ask patches[
+brains-own [available mytask info-tasks]
+links-own [rewired?]
+
+
+to generate-graph
+  clear-all
+  ask patches [
     set pcolor white
   ]
-  ;CREATION DU GRAPHEAv
-  setup-graph
-  setup-agents
 
-
-  set type1 number-type1
-  set type2 number-type2
-  let ntask1 type1
-  let ntask2 type2
-  set info []
-  set info insert-item 0 info ntask2
-  set info insert-item 0 info ntask1
-
-  ask one-of brains [
-    set contains-update-agent 1
-    update-target self info
+  create-brains 1 [
+    set shape "circle"
+    setxy random 30 - 15 random 30 - 15
   ]
 
-  reset-ticks
+  let i 1
+  while [i < number-brains][
+    create-brains 1 [
+      set shape "circle"
+      setxy random 30 - 15 random 30 - 15
+    ]
+
+    ask brain i [
+      create-link-with one-of other brains
+    ]
+
+    set i i + 1
+  ]
+
+  setup-agents
+
+  repeat 5 [
+    layout-spring (brains with [any? link-neighbors]) links 5 7 5
+  ]
+
 end
+
+to generate-fully-connected
+  clear-all
+  ask patches [
+    set pcolor white
+  ]
+
+  create-brains number-brains [
+    set shape "circle"
+    setxy random 30 - 15 random 30 - 15
+  ]
+
+  ask brains [
+    ask other brains [
+      create-link-with myself
+    ]
+  ]
+
+  setup-agents
+
+  repeat 3 [
+    layout-spring (brains with [any? link-neighbors]) links 3 15 5
+  ]
+
+end
+
+to generate-small-world
+  clear-all
+  ask patches [
+    set pcolor white
+  ]
+
+  create-brains number-brains [
+    set shape "circle"
+  ]
+
+  layout-circle (sort brains) max-pxcor - 1
+
+  let i 0
+  while [i < number-brains][
+    ask brain i [
+      create-link-with brain ((i + 1) mod number-brains)
+      create-link-with brain ((i + 2) mod number-brains)
+    ]
+    set i i + 1
+  ]
+
+  ask links [
+    if (random-float 1) < 0.4 [
+      let node1 end1
+      if [count link-neighbors] of end1 < (number-brains - 1) [
+        let node2 one-of turtles with [(self != node1) and (not link-neighbor? node1)]
+        ask node1 [
+          create-link-with node2
+        ]
+        die
+      ]
+    ]
+  ]
+
+  setup-agents
+
+end
+
+
 to setup-agents
-   ask brains[
+  ask brains[
     set available 0
     set mytask 0
     set info-tasks []
-    set contains-update-agent 0
+    set color green
     set label-color green
   ]
-end
-to setup-graph
-  create-brains number-brains[
-    set shape "circle"
-    setxy random-pxcor random-pycor
-    set color green
-  ]
-  ;CREATION DU GRAPHE (Liens)
-  repeat number-connections[
-    ask one-of brains[
-      create-link-with one-of other brains
-    ]
-  ]
-  complete-graph
-end
 
-to complete-graph   ;On complete pour avoir un graphe connexe
-  set visited  n-values number-brains [0]
-  let added-brain nobody
-  dfs 0
-  let index-a-1 []
-  let index-a-0 []
-  let index 0
-  while [index != length visited][
-
-
-
-    ifelse item index visited = 1[
-      set index-a-1 insert-item 0 index-a-1 index
-    ]
-    [
-      set index-a-0 insert-item 0 index-a-0 index
-    ]
-    set index index + 1
-  ]
-
-
-  let taille-comp-connexe length index-a-1
-
-  if taille-comp-connexe < number-brains[
-    let auhasard0 one-of index-a-0
-    let auhasard1 one-of index-a-1
-    ask brain auhasard1[
-      create-link-with brain auhasard0
-    ]
-     ask brain auhasard0[
-      create-link-with brain auhasard1
-    ]
-
-    complete-graph
-  ]
-end
-
-
-to dfs [n] ;parcours en profondeur recusif
-  if item n visited = 0[
-    set visited replace-item n visited 1
-    ask brain n[
-      ask out-link-neighbors[;pour tous les voisins
-        dfs who
-      ]
-    ]
-  ]
-end
-to go
-  ask brains with [contains-update-agent = 1][
-    let target one-of out-link-neighbors with [mytask = 0]
-    let n  who
-    ifelse target != nobody [ ;Si il existe un voisin sans tâche, on propage l'information
-      update-target target info-tasks
-      set contains-update-agent 0
-      ask target [
-        set contains-update-agent 1
-        set parent-brain-id n
-      ]
-      ][ ;Sinon on fait remonter l'information à celui qui nous l'avait donné (selon un dfs) pour qu'il puisse la donner à un des ses voisins, ou la remonter plus haut
-      set target brain parent-brain-id
-      update-target target info-tasks
-      set contains-update-agent 0
-      ask target [
-        set contains-update-agent 1
-      ]
-      ]
-  ]
-  tick
-end
-
-to update-target [myTarget receinved-info-tasks]
-  let myntask1 item 0 receinved-info-tasks
-  let myntask2 item 1 receinved-info-tasks
-  ifelse myTarget != nobody[ ; au cas ou s'il n'y a pas de voisin
-    ask myTarget[
-      if available = 0 [ ; S'il n'est pas en train de traiter une task
-        if myntask1 > 0 and myntask2 = 0[
-          set mytask 1
-          set color blue
-          set myntask1 myntask1 - 1
-        ]
-        if myntask1 = 0 and myntask2 > 0[
-          set mytask 2
-          set color red
-          set myntask2 myntask2 - 1
-        ]
-        if myntask1 > 0 and myntask2 > 0[
-          ifelse random-float 1 > 0.5[
-            set mytask 1
-            set color blue
-            set myntask1 myntask1 - 1
-          ][
-            set mytask 2
-            set color red
-            set myntask2 myntask2 - 1
-          ]
-        ]
-        set available 1
-      ]
-      set info-tasks []
-      set info-tasks insert-item 0 info-tasks myntask2
-      set info-tasks insert-item 0 info-tasks myntask1
-    ]
-  ]
-  [print "no voisin !!!"]
-
-
-end
-to-report occurrences [x the-list]
-  report reduce
-    [ [occurrence-count next-item] -> ifelse-value (next-item = x) [occurrence-count + 1] [occurrence-count] ] (fput 0 the-list)
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-210
-10
-647
-448
+408
+42
+845
+480
 -1
 -1
 13.0
@@ -192,163 +139,70 @@ ticks
 30.0
 
 SLIDER
-8
-11
-180
-44
-NUMBER-TYPE1
-NUMBER-TYPE1
-0
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-8
-62
-180
-95
-NUMBER-TYPE2
-NUMBER-TYPE2
-0
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-10
-115
-182
-148
-NUMBER-BRAINS
-NUMBER-BRAINS
-0
-200
-100.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-9
-183
-230
-216
-NUMBER-CONNECTIONS
-NUMBER-CONNECTIONS
-0
-1000
-107.0
-1
-1
-NIL
-HORIZONTAL
-
-BUTTON
-18
-249
-91
-282
-NIL
-setup
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-113
-255
-176
-288
-NIL
-go
-T
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-PLOT
-17
-324
 217
-474
-Task 1
-time
-nb of task 1
-0.0
-10.0
-0.0
-100.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot count brains with [color = blue]"
-
-PLOT
-18
-497
-218
-647
-Task 2
-time
-nb of task 2
-0.0
-10.0
-0.0
-100.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot count brains with [color = red]"
-
-PLOT
-716
-236
-916
-386
-Ratio
-time
-ratio
-0.0
-10.0
-0.0
-100.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot 100 * count brains with [color = blue]/((count brains with [color = blue]) + (count brains with [color = red]))"
-
-MONITOR
-716
-135
-1433
-180
-Ratio
-100 * count brains with [color = blue]/((count brains with [color = blue]) + (count brains with [color = red]))
-17
+108
+389
+141
+number-brains
+number-brains
+2
+30
+15.0
 1
-11
+1
+NIL
+HORIZONTAL
+
+BUTTON
+241
+209
+387
+242
+NIL
+generate-graph
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+176
+161
+388
+194
+NIL
+generate-fully-connected\n
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+205
+256
+387
+289
+NIL
+generate-small-world
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
