@@ -39,7 +39,8 @@
             <td>Liste des répartitions voulues des tâches avec les tâches en index</td>
         </tr>
            </tbody>
-</table>
+</table> 
+
 *Hypothèses:*
 
 * -Le graphe est connexe
@@ -54,7 +55,7 @@
 * -Graphe quelconque (mais toujours connexe)
 * -Autant de tâches que d’agent
 
-*Axes de développement:*
+**Axes de développement:**
 
 * -Hiérarchie des tâches
 * -Plus de tâches
