@@ -2,6 +2,7 @@ breed [brains brain]
 brains-own [available mytask info-tasks]
 links-own [rewired?]
 
+
 to generate-graph
   clear-all
   ask patches [
@@ -31,7 +32,6 @@ to generate-graph
 
   repeat 5 [
     layout-spring (brains with [any? link-neighbors]) links 5 7 5
-    display
   ]
 
 end
@@ -55,9 +55,8 @@ to generate-fully-connected
 
   setup-agents
 
-  repeat 5 [
+  repeat 3 [
     layout-spring (brains with [any? link-neighbors]) links 3 15 5
-    display
   ]
 
 end
@@ -100,6 +99,7 @@ to generate-small-world
 
 end
 
+
 to setup-agents
   ask brains[
     set available 0
@@ -112,10 +112,10 @@ to setup-agents
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-463
-25
-900
-463
+408
+42
+845
+480
 -1
 -1
 13.0
@@ -139,25 +139,25 @@ ticks
 30.0
 
 SLIDER
-145
-87
-317
-120
+217
+108
+389
+141
 number-brains
 number-brains
 2
-100
-20.0
+30
+15.0
 1
 1
 NIL
 HORIZONTAL
 
 BUTTON
-203
-190
-349
-223
+241
+209
+387
+242
 NIL
 generate-graph
 NIL
@@ -171,12 +171,12 @@ NIL
 1
 
 BUTTON
-204
-253
-416
-286
+176
+161
+388
+194
 NIL
-generate-fully-connected
+generate-fully-connected\n
 NIL
 1
 T
@@ -189,11 +189,11 @@ NIL
 
 BUTTON
 205
-308
+256
 387
-341
+289
 NIL
-generate-small-world\n
+generate-small-world
 NIL
 1
 T

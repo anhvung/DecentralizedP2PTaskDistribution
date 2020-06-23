@@ -1,59 +1,49 @@
 breed [brains brain]
-brains-own [available mytask ptask1 ptask2 ]
-globals [types type1 type2 numberoftask1 numberoftask2 starttingpoint visited ]
-
+brains-own [available mytask info-tasks ]
+globals [types type1 type2 visited info]
 to setup
   clear-all
+  ca
   ask patches[
     set pcolor white
   ]
   set types [red blue green]
+  ;CREATION DU GRAPHEAv
+  setup-graph
+  setup-agents
 
-  ;Creation du graphe
+
+  set type1 number-type1
+  set type2 number-type2
+  let ntask1 type1
+  let ntask2 type2
+  set info []
+  set info insert-item 0 info ntask2
+  set info insert-item 0 info ntask1
+
+  reset-ticks
+end
+to setup-agents
+   ask brains[
+    set available 0
+    set mytask 0
+    set info-tasks []
+    set label-color green
+  ]
+end
+to setup-graph
   create-brains number-brains[
     set shape "circle"
-    setxy random 30 - 15 random 30 - 15
-    set color one-of types
+    setxy random-pxcor random-pycor
+    set color green
   ]
-
-  ;Creation du graphe (Liens)
+  ;CREATION DU GRAPHE (Liens)
   repeat number-connections[
     ask one-of brains[
       create-link-with one-of other brains
     ]
   ]
-
   complete-graph
-
-  ;Initialisation des agents
-  ask brains[
-    set available 0
-    set mytask 0
-    set ptask1 -1
-    set ptask2 -1
-    ;set label "free"
-    set label who
-    set label-color black
-  ]
-
-  ;Nombre de types 1 et 2
-  set type1 number-type1
-  set type2 number-type2
-  ;Nombre d'agents qui traitent les différents types (0 au début)
-  set numberoftask1 0
-  set numberoftask2 0
-
-  ;Point d'entrée
-  set starttingpoint one-of brains
-
-  ;Point d'entrée
-  ask starttingpoint[
-    set ptask1 (type1 / (type1 + type2))
-    set ptask2 (type2 / (type1 + type2))
-    update-target self ptask1 ptask2
-  ]
-
-  reset-ticks
 end
 
 to complete-graph   ;On complete pour avoir un graphe connexe
@@ -64,6 +54,9 @@ to complete-graph   ;On complete pour avoir un graphe connexe
   let index-a-0 []
   let index 0
   while [index != length visited][
+
+
+
     ifelse item index visited = 1[
       set index-a-1 insert-item 0 index-a-1 index
     ]
@@ -88,7 +81,6 @@ to complete-graph   ;On complete pour avoir un graphe connexe
 
     complete-graph
   ]
-
 end
 
 
@@ -102,47 +94,57 @@ to dfs [n] ;parcours en profondeur recusif
     ]
   ]
 end
-
 to go
-  ask brains[
-    ;On choisit au hasard avec une probabilité uniforme un voisin avec lequel on va communiquer
-    let target one-of link-neighbors
-
-
-    if ptask2 >= 0[  ;Si il a une information à donner (Sinon pas la peine de communiquer)
-
-      update-target target ptask1 ptask2
-    ]
-
-  ]
-
+  set visited  n-values number-brains [0]
+  propage 0 info
   tick
 end
 
+to propage [n intel] ;cette procédure s'inspire du dfs pour propager l'information
+  update-target brain n intel ;l'information est transmise sur l'agent actuel
+  if item n visited = 0[
+    set visited replace-item n visited 1
+    ask brain n[
+      ask out-link-neighbors[
+        propage who [info-tasks] of brain n
+        update-target brain n [info-tasks] of brain who ;l'information doit remonter à la source avant de se propager vers les autres voisins
+      ]
+    ]
+  ]
+end
 
-to update-target [myTarget myptask1 myptask2]
+to update-target [myTarget receinved-info-tasks]
+  let myntask1 item 0 receinved-info-tasks
+  let myntask2 item 1 receinved-info-tasks
   ifelse myTarget != nobody[ ; au cas ou s'il n'y a pas de voisin
     ask myTarget[
-      set ptask1 myptask1
-      set ptask2 myptask2
       if available = 0 [ ; S'il n'est pas en train de traiter une task
-        ifelse  (random-float 1) > myptask1 [ ;Si on choisit task2
-          set mytask 2
-          set numberoftask2 (numberoftask2 + 1)
-          set label "type2"
-
-
-        ]
-        [;  ELSE Si on choisit task1
+        if myntask1 > 0 and myntask2 = 0[
           set mytask 1
-          set numberoftask1 (numberoftask1 + 1)
-          set label "type1"
-
-
+          set color blue
+          set myntask1 myntask1 - 1
         ]
-
+        if myntask1 = 0 and myntask2 > 0[
+          set mytask 2
+          set color red
+          set myntask2 myntask2 - 1
+        ]
+        if myntask1 > 0 and myntask2 > 0[
+          ifelse random-float 1 > 0.5[
+            set mytask 1
+            set color blue
+            set myntask1 myntask1 - 1
+          ][
+            set mytask 2
+            set color red
+            set myntask2 myntask2 - 1
+          ]
+        ]
         set available 1
       ]
+      set info-tasks []
+      set info-tasks insert-item 0 info-tasks myntask2
+      set info-tasks insert-item 0 info-tasks myntask1
     ]
   ]
   [print "no voisin !!!"]
@@ -181,13 +183,73 @@ GRAPHICS-WINDOW
 ticks
 30.0
 
-BUTTON
-13
-63
-76
-96
+SLIDER
+8
+11
+180
+44
+NUMBER-TYPE1
+NUMBER-TYPE1
+0
+100
+50.0
+1
+1
 NIL
-setup\n
+HORIZONTAL
+
+SLIDER
+8
+62
+180
+95
+NUMBER-TYPE2
+NUMBER-TYPE2
+0
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+10
+115
+182
+148
+NUMBER-BRAINS
+NUMBER-BRAINS
+0
+200
+100.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+9
+183
+230
+216
+NUMBER-CONNECTIONS
+NUMBER-CONNECTIONS
+0
+1000
+107.0
+1
+1
+NIL
+HORIZONTAL
+
+BUTTON
+18
+249
+91
+282
+NIL
+setup
 NIL
 1
 T
@@ -198,41 +260,11 @@ NIL
 NIL
 1
 
-SLIDER
-10
-109
-182
-142
-number-brains
-number-brains
-0
-100
-12.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-10
-154
-182
-187
-number-connections
-number-connections
-0
-1000
-561.0
-1
-1
-NIL
-HORIZONTAL
-
 BUTTON
 113
-63
+255
 176
-96
+288
 NIL
 go
 T
@@ -245,44 +277,14 @@ NIL
 NIL
 1
 
-SLIDER
-12
-201
-184
-234
-number-type1
-number-type1
-0
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-10
-240
-182
-273
-number-type2
-number-type2
-0
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
-
 PLOT
-7
-457
-207
-607
+17
+324
+217
+474
 Task 1
-Tick
-Task1
+ticks
+nb of task 1
 0.0
 10.0
 0.0
@@ -291,16 +293,16 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot numberoftask1"
+"default" 1.0 0 -16777216 true "" "plot count brains with [color = blue]"
 
 PLOT
-232
-460
-432
-610
+18
+497
+218
+647
 Task 2
-Tick
-Task 2
+ticks
+nb of task 2
 0.0
 10.0
 0.0
@@ -309,16 +311,16 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot numberoftask2"
+"default" 1.0 0 -16777216 true "" "plot count brains with [color = red]"
 
 PLOT
-0
-284
-200
-434
-Distribution
-Time
+716
+236
+916
+386
 Ratio
+time
+ratio
 0.0
 10.0
 0.0
@@ -327,7 +329,18 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot (numberoftask1 / (numberoftask2 + numberoftask1)) * 100"
+"default" 1.0 0 -16777216 true "" "plot 100 * count brains with [color = blue]/((count brains with [color = blue]) + (count brains with [color = red]))"
+
+MONITOR
+716
+135
+1433
+180
+NIL
+100 * count brains with [color = blue]/((count brains with [color = blue]) + (count brains with [color = red]))
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
