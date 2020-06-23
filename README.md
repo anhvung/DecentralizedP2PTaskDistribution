@@ -5,7 +5,28 @@
 * David Gérard
 * Arthur Gourrin
 
-
+<table>
+    <thead>
+        <tr>
+            <th>Paramètres internes</th>
+            <th align="center">Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Available</td>
+            <td align="center">Si l’agent est en train de traiter une tâche (bool)</td>
+        </tr>
+        <tr>
+            <td>mytask</td>
+            <td align="center">Tâche de l’agent (int, 0 si aucune tâche)</td>
+        </tr>
+        <tr>
+            <td>color</td>
+            <td align="center">Bleu ou rouge en fonction de la tâche (1 ou 2) et vert si aucune</td>
+        </tr>
+    </tbody>
+</table>
 *Hypothèses:*
 
 * -Le graphe est connexe
