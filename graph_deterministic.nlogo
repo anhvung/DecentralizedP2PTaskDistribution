@@ -1,13 +1,11 @@
 breed [brains brain]
 brains-own [available mytask info-tasks ]
-globals [types type1 type2 visited info]
+globals [type1 type2 visited info time]
 to setup
-  clear-all
   ca
   ask patches[
     set pcolor white
   ]
-  set types [red blue green]
   ;CREATION DU GRAPHEAv
   setup-graph
   setup-agents
@@ -21,6 +19,7 @@ to setup
   set info insert-item 0 info ntask2
   set info insert-item 0 info ntask1
 
+  set time 0
   reset-ticks
 end
 to setup-agents
@@ -102,12 +101,14 @@ end
 
 to propage [n intel] ;cette procédure s'inspire du dfs pour propager l'information
   update-target brain n intel ;l'information est transmise sur l'agent actuel
+  set time time + 1
   if item n visited = 0[
     set visited replace-item n visited 1
     ask brain n[
       ask out-link-neighbors[
         propage who [info-tasks] of brain n
         update-target brain n [info-tasks] of brain who ;l'information doit remonter à la source avant de se propager vers les autres voisins
+        set time time + 1
       ]
     ]
   ]
@@ -283,17 +284,17 @@ PLOT
 217
 474
 Task 1
-ticks
+time
 nb of task 1
 0.0
 10.0
 0.0
-10.0
+100.0
 true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot count brains with [color = blue]"
+"default" 1.0 0 -16777216 true "" "plotxy time count brains with [color = blue]"
 
 PLOT
 18
@@ -301,17 +302,17 @@ PLOT
 218
 647
 Task 2
-ticks
+time
 nb of task 2
 0.0
 10.0
 0.0
-10.0
+100.0
 true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot count brains with [color = red]"
+"default" 1.0 0 -16777216 true "" "plotxy time count brains with [color = red]"
 
 PLOT
 716
@@ -324,12 +325,12 @@ ratio
 0.0
 10.0
 0.0
-10.0
+100.0
 true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot 100 * count brains with [color = blue]/((count brains with [color = blue]) + (count brains with [color = red]))"
+"default" 1.0 0 -16777216 true "" "plotxy time 100 * count brains with [color = blue]/((count brains with [color = blue]) + (count brains with [color = red]))"
 
 MONITOR
 716
