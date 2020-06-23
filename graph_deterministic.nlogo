@@ -1,6 +1,6 @@
 breed [brains brain]
-brains-own [available mytask info-tasks ]
-globals [type1 type2 visited info time]
+brains-own [available mytask info-tasks contains-update-agent parent-brain-id]
+globals [type1 type2 visited info]
 to setup
   ca
   ask patches[
@@ -19,7 +19,11 @@ to setup
   set info insert-item 0 info ntask2
   set info insert-item 0 info ntask1
 
-  set time 0
+  ask one-of brains [
+    set contains-update-agent 1
+    update-target self info
+  ]
+
   reset-ticks
 end
 to setup-agents
@@ -27,6 +31,7 @@ to setup-agents
     set available 0
     set mytask 0
     set info-tasks []
+    set contains-update-agent 0
     set label-color green
   ]
 end
@@ -94,24 +99,26 @@ to dfs [n] ;parcours en profondeur recusif
   ]
 end
 to go
-  set visited  n-values number-brains [0]
-  propage 0 info
-  tick
-end
-
-to propage [n intel] ;cette procédure s'inspire du dfs pour propager l'information
-  update-target brain n intel ;l'information est transmise sur l'agent actuel
-  set time time + 1
-  if item n visited = 0[
-    set visited replace-item n visited 1
-    ask brain n[
-      ask out-link-neighbors[
-        propage who [info-tasks] of brain n
-        update-target brain n [info-tasks] of brain who ;l'information doit remonter à la source avant de se propager vers les autres voisins
-        set time time + 1
+  ask brains with [contains-update-agent = 1][
+    let target one-of out-link-neighbors with [mytask = 0]
+    let n  who
+    ifelse target != nobody [ ;Si il existe un voisin sans tâche, on propage l'information
+      update-target target info-tasks
+      set contains-update-agent 0
+      ask target [
+        set contains-update-agent 1
+        set parent-brain-id n
       ]
-    ]
+      ][ ;Sinon on fait remonter l'information à celui qui nous l'avait donné (selon un dfs) pour qu'il puisse la donner à un des ses voisins, ou la remonter plus haut
+      set target brain parent-brain-id
+      update-target target info-tasks
+      set contains-update-agent 0
+      ask target [
+        set contains-update-agent 1
+      ]
+      ]
   ]
+  tick
 end
 
 to update-target [myTarget receinved-info-tasks]
@@ -294,7 +301,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plotxy time count brains with [color = blue]"
+"default" 1.0 0 -16777216 true "" "plot count brains with [color = blue]"
 
 PLOT
 18
@@ -312,7 +319,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plotxy time count brains with [color = red]"
+"default" 1.0 0 -16777216 true "" "plot count brains with [color = red]"
 
 PLOT
 716
@@ -330,14 +337,14 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plotxy time 100 * count brains with [color = blue]/((count brains with [color = blue]) + (count brains with [color = red]))"
+"default" 1.0 0 -16777216 true "" "plot 100 * count brains with [color = blue]/((count brains with [color = blue]) + (count brains with [color = red]))"
 
 MONITOR
 716
 135
 1433
 180
-NIL
+Ratio
 100 * count brains with [color = blue]/((count brains with [color = blue]) + (count brains with [color = red]))
 17
 1
