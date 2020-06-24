@@ -101,12 +101,85 @@ end
 
 
 to setup-agents
+
   ask brains[
+
     set available 0
     set mytask 0
     set info-tasks []
     set color green
     set label-color green
+
+  ]
+
+end
+
+to elect-root
+  let minimum 0
+  let indiceMinimum 0
+  let i 0
+
+    while [i < number-brains][
+
+      let liste list (0)(0)
+      let j 2
+      let level 1
+
+
+      ask brain i[
+        while [j < number-brains][
+          set liste insert-item i liste 0
+
+          if link-neighbor? brain j[
+            set liste insert-item j liste level
+          ]
+        set j j + 1
+       ]
+
+      ]
+    set level level + 1
+    let q 0
+    while [q < number-brains][
+
+      let k 0
+      while [k < number-brains][
+        if item k liste = level - 1[
+          ask brain k[
+            let n 0
+            while [n < number-brains][
+
+              if link-neighbor? brain [
+                set liste insert-item j liste level
+              ]
+
+            ]
+
+         ]
+
+
+        ]
+
+
+        set k k + 1
+      ]
+
+      set level level + 1
+      set q q + 1
+    ]
+    let power 0
+    let p 0
+    while[p < number-brains][
+      set power power + item p liste
+    ]
+    if power < minimum[
+      set minimum power
+      set indiceMinimum i
+    ]
+    set i i + 1
+    ]
+
+  ask brain indiceMinimum[
+    set color red
   ]
 
 end
@@ -147,7 +220,7 @@ number-brains
 number-brains
 2
 30
-15.0
+13.0
 1
 1
 NIL
@@ -194,6 +267,23 @@ BUTTON
 289
 NIL
 generate-small-world
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+210
+343
+304
+376
+elect-root
+elect-root
 NIL
 1
 T
