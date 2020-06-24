@@ -116,41 +116,41 @@ end
 
 to elect-root ;; va trouver le neud le plus proche de tous les autres
 
-  let minimum 0
+  let minimum number-brains * number-brains
   let indiceMinimum 0
   let i 0
 
     while [i < number-brains][ ;; pour chaque noeud, on va calculer la somme des distances qui le sépare des autres noeuds
 
       let liste list (0)(0) ;; cette liste va contenir à l'indice j la distance entre le noeud d'indice j et le noeud etudié i
-      let j 2
+      let j 0
       let level 1 ;; level est la distance à laquelle on se situe du noeud i étudié
 
 
       ask brain i[ ;; premiere étape : on crée la liste de taille number-brains en mettant des 1 pour les voisins du noeud étudié et des number-brains - 1 ailleurs
         while [j < number-brains][
-          set liste insert-item j liste (number-brains - 1)
+          set liste insert-item j liste (number-brains - 1) ;; on inititalise les distances à la distance maximale possible
 
           if link-neighbor? brain j[
-            set liste insert-item j liste level
+            set liste replace-item j liste level
           ]
         set j j + 1
        ]
       ]
-    set liste insert-item i liste 0
+    set liste replace-item i liste 0 ;; on met une distance de 0 pour le noeud étudié
     set level level + 1
     let q 0
-    while [q < number-brains][ ;; dans le pire des cas, si tous les noeuds sont allignés on a au maximum number-brains - 1 levels
+    while [level < number-brains][ ;; dans le pire des cas, si tous les noeuds sont allignés on a au maximum number-brains - 1 levels
                                ;; on va donc regarder quels sont les voisins des voisins, tout en enregistrant la distance au noeud étudié dans la liste
       let k 0
       while [k < number-brains][
-        if item k liste = level - 1[ ;; si le noeud k est du niveau level - 1 alors on va chercher ses voisins encore non connéctés pour les mettres au niveau level
+        if item k liste = level - 1[ ;; si le noeud k est du niveau (level - 1) alors on va chercher ses voisins encore non connéctés pour les mettres au niveau level
           ask brain k[
             let n 0
             while [n < number-brains][
 
-              if (link-neighbor? brain n) and (item n liste > level)[
-                set liste insert-item n liste level
+              if (link-neighbor? brain n) and (item n liste > level)[ ;; si le noeud n est voisin du noeud k et qu'il n'a pas encore été connecté au réseau alors on le connecte en indiquant qu'il est à une distance de level du noeud étudié
+                set liste replace-item n liste level
               ]
               set n n + 1
             ]
@@ -165,21 +165,26 @@ to elect-root ;; va trouver le neud le plus proche de tous les autres
       ]
 
       set level level + 1
-      set q q + 1
     ]
+
     let power 0
     let p 0
+
     while[p < number-brains][
       set power power + item p liste
+      set p p + 1
     ]
-    if power < minimum[
+
+    if power <= minimum[
+
       set minimum power
       set indiceMinimum i
     ]
     set i i + 1
     ]
 
-  ask brain indiceMinimum[
+
+  ask brain indiceMinimum[ ;; indiceMinimum est l'indice du noeud racine
     set color red
   ]
 
@@ -221,7 +226,7 @@ number-brains
 number-brains
 2
 30
-13.0
+7.0
 1
 1
 NIL
