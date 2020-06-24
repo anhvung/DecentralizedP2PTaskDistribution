@@ -1,13 +1,11 @@
 breed [brains brain]
-brains-own [available mytask info-tasks ]
-globals [types type1 type2 numberoftask1 numberoftask2 starttingpoint visited globalroot]
+brains-own [available mytask info-tasks contains-update-agent parent-brain-id]
+globals [type1 type2 visited info globalroot]
 to setup
-  clear-all
   ca
   ask patches[
     set pcolor white
   ]
-  set types [red blue green]
   ;CREATION DU GRAPHEAv
   setup-graph
   setup-agents
@@ -15,23 +13,21 @@ to setup
 
   set type1 number-type1
   set type2 number-type2
-
-
-  ;Point d'entrée
-
-
- elect-root
+  let ntask1 type1
+  let ntask2 type2
+  set info []
+  set info insert-item 0 info ntask2
+  set info insert-item 0 info ntask1
+  elect-root
   ask brain globalroot [
-    let ptask1 (type1 / (type1 + type2))
-    let ptask2 (type2 / (type1 + type2))
-    set info-tasks insert-item 0 info-tasks ptask2
-     set info-tasks insert-item 0 info-tasks ptask1
-    update-target self info-tasks
-  ]
 
+    set contains-update-agent 1
+    update-target self info
+  ]
 
   reset-ticks
 end
+
 to elect-root ;; va trouver le neud le plus proche de tous les autres
 
   let minimum number-brains * number-brains
@@ -113,6 +109,7 @@ to setup-agents
     set available 0
     set mytask 0
     set info-tasks []
+    set contains-update-agent 0
     set label-color green
   ]
 end
@@ -166,10 +163,6 @@ to complete-graph   ;On complete pour avoir un graphe connexe
 
     complete-graph
   ]
-
-
-
-
 end
 
 
@@ -184,46 +177,60 @@ to dfs [n] ;parcours en profondeur recusif
   ]
 end
 to go
-  ask brains[
-    ;On choisit au hasard avec une probabilité uniforme un voisin avec lequel on va communiquer
-    let target one-of link-neighbors
-
-
-    if length info-tasks > 0[  ;Si il a une information à donner (Sinon pas la peine de communiquer)
-
+  ask brains with [contains-update-agent = 1][
+    let target one-of out-link-neighbors with [mytask = 0]
+    let n  who
+    ifelse target != nobody [ ;Si il existe un voisin sans tâche, on propage l'information
       update-target target info-tasks
-    ]
-
+      set contains-update-agent 0
+      ask target [
+        set contains-update-agent 1
+        set parent-brain-id n
+      ]
+      ][ ;Sinon on fait remonter l'information à celui qui nous l'avait donné (selon un dfs) pour qu'il puisse la donner à un des ses voisins, ou la remonter plus haut
+      set target brain parent-brain-id
+      update-target target info-tasks
+      set contains-update-agent 0
+      ask target [
+        set contains-update-agent 1
+      ]
+      ]
   ]
-
   tick
 end
 
-
 to update-target [myTarget receinved-info-tasks]
-  let myptask1 item 0 receinved-info-tasks
-  let myptask2 item 1 receinved-info-tasks
+  let myntask1 item 0 receinved-info-tasks
+  let myntask2 item 1 receinved-info-tasks
   ifelse myTarget != nobody[ ; au cas ou s'il n'y a pas de voisin
     ask myTarget[
-       set info-tasks insert-item 0 info-tasks myptask2
-       set info-tasks insert-item 0 info-tasks myptask1
-
       if available = 0 [ ; S'il n'est pas en train de traiter une task
-        ifelse  (random-float 1) > myptask1 [ ;Si on choisit task2
-          set mytask 2
-          set color red
-
-
-        ]
-        [;  ELSE Si on choisit task1
+        if myntask1 > 0 and myntask2 = 0[
           set mytask 1
           set color blue
-
-
+          set myntask1 myntask1 - 1
         ]
-
+        if myntask1 = 0 and myntask2 > 0[
+          set mytask 2
+          set color red
+          set myntask2 myntask2 - 1
+        ]
+        if myntask1 > 0 and myntask2 > 0[
+          ifelse random-float 1 > 0.5[
+            set mytask 1
+            set color blue
+            set myntask1 myntask1 - 1
+          ][
+            set mytask 2
+            set color red
+            set myntask2 myntask2 - 1
+          ]
+        ]
         set available 1
       ]
+      set info-tasks []
+      set info-tasks insert-item 0 info-tasks myntask2
+      set info-tasks insert-item 0 info-tasks myntask1
     ]
   ]
   [print "no voisin !!!"]
@@ -236,13 +243,13 @@ to-report occurrences [x the-list]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-226
-58
-807
-640
+210
+10
+647
+448
 -1
 -1
-17.364
+13.0
 1
 10
 1
@@ -262,13 +269,73 @@ GRAPHICS-WINDOW
 ticks
 30.0
 
-BUTTON
-13
-51
-76
-84
+SLIDER
+8
+11
+180
+44
+NUMBER-TYPE1
+NUMBER-TYPE1
+0
+100
+50.0
+1
+1
 NIL
-setup\n
+HORIZONTAL
+
+SLIDER
+8
+62
+180
+95
+NUMBER-TYPE2
+NUMBER-TYPE2
+0
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+10
+115
+182
+148
+NUMBER-BRAINS
+NUMBER-BRAINS
+0
+200
+100.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+9
+183
+230
+216
+NUMBER-CONNECTIONS
+NUMBER-CONNECTIONS
+0
+1000
+107.0
+1
+1
+NIL
+HORIZONTAL
+
+BUTTON
+18
+249
+91
+282
+NIL
+setup
 NIL
 1
 T
@@ -279,41 +346,11 @@ NIL
 NIL
 1
 
-SLIDER
-10
-109
-182
-142
-number-brains
-number-brains
-0
-1000
-153.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-10
-154
-182
-187
-number-connections
-number-connections
-0
-1000
-287.0
-1
-1
-NIL
-HORIZONTAL
-
 BUTTON
-118
-51
-181
-84
+113
+255
+176
+288
 NIL
 go
 T
@@ -326,84 +363,54 @@ NIL
 NIL
 1
 
-SLIDER
-12
-201
-184
-234
-number-type1
-number-type1
-0
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-10
-240
-182
-273
-number-type2
-number-type2
-0
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
-
 PLOT
-7
-457
-207
-607
+17
+324
+217
+474
 Task 1
-Tick
-Task1
+time
+nb of task 1
 0.0
 10.0
 0.0
-10.0
+100.0
 true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "plot count brains with [color = blue]" "plot count brains with [color = blue]"
+"default" 1.0 0 -16777216 true "" "plot count brains with [color = blue]"
 
 PLOT
-8
-627
-208
-777
+18
+497
+218
+647
 Task 2
-Tick
-Task 2
+time
+nb of task 2
 0.0
 10.0
 0.0
-10.0
+100.0
 true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "plot count brains with [color = blue]" "plot count brains with [color = blue]"
+"default" 1.0 0 -16777216 true "" "plot count brains with [color = red]"
 
 PLOT
-860
-73
-1599
-701
-Distribution
-Time
+716
+236
+916
+386
 Ratio
+time
+ratio
 0.0
 10.0
 0.0
-10.0
+100.0
 true
 false
 "" ""
@@ -411,11 +418,11 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot 100 * count brains with [color = blue]/((count brains with [color = blue]) + (count brains with [color = red]))"
 
 MONITOR
-865
-16
-1498
-61
-NIL
+716
+135
+1433
+180
+Ratio
 100 * count brains with [color = blue]/((count brains with [color = blue]) + (count brains with [color = red]))
 17
 1
@@ -424,15 +431,15 @@ NIL
 @#$#@#$#@
 ## WHAT IS IT?
 
-Setup generates a simple graph showing a network of agents capable of solving tasks.
+(a general understanding of what the model is trying to show or explain)
 
 ## HOW IT WORKS
 
-An entry point is determined randomly and will spread the information of the tasks. At each tick, each agent will randomly chose a neighbor to which to information will be sent.
+(what rules the agents use to create the overall behavior of the model)
 
 ## HOW TO USE IT
 
-
+(how to use the model, including a description of each of the items in the Interface tab)
 
 ## THINGS TO NOTICE
 

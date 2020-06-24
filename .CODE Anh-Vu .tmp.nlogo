@@ -20,7 +20,7 @@ to setup
   ;Point d'entrée
 
 
- elect-root
+
   ask brain globalroot [
     let ptask1 (type1 / (type1 + type2))
     let ptask2 (type2 / (type1 + type2))
@@ -288,7 +288,7 @@ number-brains
 number-brains
 0
 1000
-153.0
+293.0
 1
 1
 NIL
@@ -303,7 +303,7 @@ number-connections
 number-connections
 0
 1000
-287.0
+0.0
 1
 1
 NIL
