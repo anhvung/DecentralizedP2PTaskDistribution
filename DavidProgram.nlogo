@@ -114,44 +114,45 @@ to setup-agents
 
 end
 
-to elect-root
+to elect-root ;; va trouver le neud le plus proche de tous les autres
+
   let minimum 0
   let indiceMinimum 0
   let i 0
 
-    while [i < number-brains][
+    while [i < number-brains][ ;; pour chaque noeud, on va calculer la somme des distances qui le sépare des autres noeuds
 
-      let liste list (0)(0)
+      let liste list (0)(0) ;; cette liste va contenir à l'indice j la distance entre le noeud d'indice j et le noeud etudié i
       let j 2
-      let level 1
+      let level 1 ;; level est la distance à laquelle on se situe du noeud i étudié
 
 
-      ask brain i[
+      ask brain i[ ;; premiere étape : on crée la liste de taille number-brains en mettant des 1 pour les voisins du noeud étudié et des number-brains - 1 ailleurs
         while [j < number-brains][
-          set liste insert-item i liste 0
+          set liste insert-item j liste (number-brains - 1)
 
           if link-neighbor? brain j[
             set liste insert-item j liste level
           ]
         set j j + 1
        ]
-
       ]
+    set liste insert-item i liste 0
     set level level + 1
     let q 0
-    while [q < number-brains][
-
+    while [q < number-brains][ ;; dans le pire des cas, si tous les noeuds sont allignés on a au maximum number-brains - 1 levels
+                               ;; on va donc regarder quels sont les voisins des voisins, tout en enregistrant la distance au noeud étudié dans la liste
       let k 0
       while [k < number-brains][
-        if item k liste = level - 1[
+        if item k liste = level - 1[ ;; si le noeud k est du niveau level - 1 alors on va chercher ses voisins encore non connéctés pour les mettres au niveau level
           ask brain k[
             let n 0
             while [n < number-brains][
 
-              if link-neighbor? brain [
-                set liste insert-item j liste level
+              if (link-neighbor? brain n) and (item n liste > level)[
+                set liste insert-item n liste level
               ]
-
+              set n n + 1
             ]
 
          ]
