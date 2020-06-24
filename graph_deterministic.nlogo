@@ -1,14 +1,142 @@
 breed [brains brain]
 brains-own [available mytask info-tasks contains-update-agent parent-brain-id]
 globals [type1 type2 visited info globalroot]
-to setup
-  ca
-  ask patches[
+
+to generate-tree
+  clear-all
+  ask patches [
     set pcolor white
   ]
-  ;CREATION DU GRAPHEAv
-  setup-graph
+
+  create-brains 1 [
+    set shape "circle"
+    setxy random 30 - 15 random 30 - 15
+  ]
+
+  let i 1
+  while [i < number-brains][
+    create-brains 1 [
+      set shape "circle"
+      setxy random 30 - 15 random 30 - 15
+    ]
+
+    ask brain i [
+      create-link-with one-of other brains
+    ]
+
+    set i i + 1
+  ]
+
   setup-agents
+
+  layout-radial brains links brain 0
+
+end
+
+to generate-graph
+  clear-all
+  ask patches [
+    set pcolor white
+  ]
+
+  create-brains 1 [
+    set shape "circle"
+    setxy random 30 - 15 random 30 - 15
+  ]
+
+  let i 1
+  while [i < number-brains][
+    create-brains 1 [
+      set shape "circle"
+      setxy random 30 - 15 random 30 - 15
+    ]
+
+    ask brain i [
+      create-link-with one-of other brains
+    ]
+
+    set i i + 1
+  ]
+
+  while [i < number-connections][
+    let node1 one-of brains
+    let node2 one-of brains with [self != node1]
+    ask node1 [
+      create-link-with node2
+    ]
+
+    set i i + 1
+  ]
+
+  setup-agents
+
+  layout-radial brains links brain 0
+
+end
+
+to generate-fully-connected
+  clear-all
+  ask patches [
+    set pcolor white
+  ]
+
+  create-brains number-brains [
+    set shape "circle"
+    setxy random 30 - 15 random 30 - 15
+  ]
+
+  ask brains [
+    ask other brains [
+      create-link-with myself
+    ]
+  ]
+
+  setup-agents
+
+  layout-radial brains links brain 0
+
+end
+
+to generate-small-world
+  clear-all
+  ask patches [
+    set pcolor white
+  ]
+
+  create-brains number-brains [
+    set shape "circle"
+  ]
+
+  layout-circle (sort brains) max-pxcor - 1
+
+  let i 0
+  while [i < number-brains][
+    ask brain i [
+      create-link-with brain ((i + 1) mod number-brains)
+      create-link-with brain ((i + 2) mod number-brains)
+    ]
+    set i i + 1
+  ]
+
+  ask links [
+    if (random-float 1) < 0.4 [
+      let node1 end1
+      if [count link-neighbors] of end1 < (number-brains - 1) [
+        let node2 one-of brains with [(self != node1) and (not link-neighbor? node1)]
+        ask node1 [
+          create-link-with node2
+        ]
+        die
+      ]
+    ]
+  ]
+
+  setup-agents
+
+end
+
+to setup
+   ask brains[set color black]
 
 
   set type1 number-type1
@@ -18,8 +146,8 @@ to setup
   set info []
   set info insert-item 0 info ntask2
   set info insert-item 0 info ntask1
-  elect-root
-  ask brain globalroot [
+
+  ask one-of brains [
     set color yellow
     set contains-update-agent 1
     update-target self info
@@ -277,8 +405,8 @@ SLIDER
 NUMBER-TYPE1
 NUMBER-TYPE1
 0
-100
-50.0
+5000
+5000.0
 1
 1
 NIL
@@ -292,8 +420,8 @@ SLIDER
 NUMBER-TYPE2
 NUMBER-TYPE2
 0
-100
-50.0
+5000
+5000.0
 1
 1
 NIL
@@ -307,8 +435,8 @@ SLIDER
 NUMBER-BRAINS
 NUMBER-BRAINS
 0
-200
-100.0
+10000
+10000.0
 1
 1
 NIL
@@ -317,13 +445,13 @@ HORIZONTAL
 SLIDER
 9
 183
-230
+184
 216
 NUMBER-CONNECTIONS
 NUMBER-CONNECTIONS
 0
 1000
-107.0
+669.0
 1
 1
 NIL
@@ -364,10 +492,10 @@ NIL
 1
 
 PLOT
-17
-324
-217
-474
+0
+487
+200
+637
 Task 1
 time
 nb of task 1
@@ -382,10 +510,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count brains with [color = blue]"
 
 PLOT
-18
-497
-218
-647
+1
+660
+201
+810
 Task 2
 time
 nb of task 2
@@ -402,8 +530,8 @@ PENS
 PLOT
 716
 236
-916
-386
+1479
+703
 Ratio
 time
 ratio
@@ -427,6 +555,74 @@ Ratio
 17
 1
 11
+
+BUTTON
+8
+306
+180
+339
+NIL
+generate-fully-connected
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+34
+350
+153
+383
+NIL
+generate-graph\n
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+39
+446
+149
+479
+NIL
+generate-tree
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+25
+407
+173
+440
+NIL
+generate-small-world
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?

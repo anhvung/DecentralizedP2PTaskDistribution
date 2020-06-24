@@ -533,7 +533,7 @@ number-brains
 number-brains
 0
 100
-100.0
+38.0
 1
 1
 NIL
@@ -548,7 +548,7 @@ number-connections
 number-connections
 0
 100
-85.0
+38.0
 1
 1
 NIL
@@ -580,7 +580,7 @@ number-type1
 number-type1
 0
 100
-50.0
+19.0
 1
 1
 NIL
@@ -595,7 +595,7 @@ number-type2
 number-type2
 0
 100
-50.0
+19.0
 1
 1
 NIL
@@ -667,10 +667,10 @@ NIL
 11
 
 SLIDER
-27
-302
-199
-335
+13
+292
+185
+325
 interval
 interval
 1
