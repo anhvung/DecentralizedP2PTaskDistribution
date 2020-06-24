@@ -3,7 +3,7 @@ brains-own [available mytask info-tasks]
 links-own [rewired?]
 
 
-to generate-graph
+to generate-tree
   clear-all
   ask patches [
     set pcolor white
@@ -30,9 +30,48 @@ to generate-graph
 
   setup-agents
 
-  repeat 5 [
-    layout-spring (brains with [any? link-neighbors]) links 5 7 5
+  layout-radial brains links brain 0
+
+end
+
+to generate-graph
+  clear-all
+  ask patches [
+    set pcolor white
   ]
+
+  create-brains 1 [
+    set shape "circle"
+    setxy random 30 - 15 random 30 - 15
+  ]
+
+  let i 1
+  while [i < number-brains][
+    create-brains 1 [
+      set shape "circle"
+      setxy random 30 - 15 random 30 - 15
+    ]
+
+    ask brain i [
+      create-link-with one-of other brains
+    ]
+
+    set i i + 1
+  ]
+
+  while [i < number-connections][
+    let node1 one-of brains
+    let node2 one-of brains with [self != node1]
+    ask node1 [
+      create-link-with node2
+    ]
+
+    set i i + 1
+  ]
+
+  setup-agents
+
+  layout-radial brains links brain 0
 
 end
 
@@ -55,9 +94,7 @@ to generate-fully-connected
 
   setup-agents
 
-  repeat 3 [
-    layout-spring (brains with [any? link-neighbors]) links 3 15 5
-  ]
+  layout-radial brains links brain 0
 
 end
 
@@ -86,7 +123,7 @@ to generate-small-world
     if (random-float 1) < 0.4 [
       let node1 end1
       if [count link-neighbors] of end1 < (number-brains - 1) [
-        let node2 one-of turtles with [(self != node1) and (not link-neighbor? node1)]
+        let node2 one-of brains with [(self != node1) and (not link-neighbor? node1)]
         ask node1 [
           create-link-with node2
         ]
@@ -139,27 +176,27 @@ ticks
 30.0
 
 SLIDER
-217
-108
-389
-141
+19
+88
+191
+121
 number-brains
 number-brains
 2
 30
-15.0
+24.0
 1
 1
 NIL
 HORIZONTAL
 
 BUTTON
-241
-209
-387
-242
+237
+285
+383
+318
 NIL
-generate-graph
+generate-tree\n
 NIL
 1
 T
@@ -171,10 +208,10 @@ NIL
 1
 
 BUTTON
-176
-161
-388
-194
+172
+237
+384
+270
 NIL
 generate-fully-connected\n
 NIL
@@ -188,12 +225,44 @@ NIL
 1
 
 BUTTON
-205
-256
-387
-289
+201
+332
+383
+365
 NIL
 generate-small-world
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+SLIDER
+192
+89
+397
+122
+number-connections
+number-connections
+0
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
+
+BUTTON
+249
+188
+395
+221
+NIL
+generate-graph\n
 NIL
 1
 T
