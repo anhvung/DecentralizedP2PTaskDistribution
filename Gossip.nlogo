@@ -1,5 +1,5 @@
 breed [brains brain]
-brains-own [available mytask info-tasks datalist refreshrate]
+brains-own [available mytask info-tasks datalist refreshrate refreshlimit]
 breed [infos info]
 infos-own [ brainId status taskslist timestamp ]
 globals [types type1 type2 numberoftask1 numberoftask2 starttingpoint visited update-interval]
@@ -196,29 +196,46 @@ to updateTask [myId]
 
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ask brain myId[
-    set refreshrate refreshrate - 1
-  ]
 
-  if refreshrate <= 0 [
 
-    let taskstates map [ netlogoctropnul -> 0 ]  [50 50] ;newInfoList
-    foreach datalist[
-      dataitem ->
-      ask dataitem [
-        if status >= 0 [
-          set taskstates replace-item status taskstates (( item status taskstates ) + 1)
-        ]
+
+  let taskstates map [ netlogoctropnul -> 0 ]  [50 50] ;newInfoList
+  foreach datalist[
+    dataitem ->
+    ask dataitem [
+      if status >= 0 [
+        set taskstates replace-item status taskstates (( item status taskstates ) + 1)
       ]
     ]
+  ]
 
-    ; set taskstates ( map [ [ currentvalue maxvalue ] -> maxvalue - currentvalue ] taskstates newInfoList)
-    ;print taskstates
-    set taskstates ( map [ [a b] -> a - b ] [50 50] taskstates)
+  ; set taskstates ( map [ [ currentvalue maxvalue ] -> maxvalue - currentvalue ] taskstates newInfoList)
+  ;print taskstates
 
+  ask brain myId[
+    ifelse 0 = (item 1 taskstates) +  (item 0 taskstates) [
+      set refreshlimit 0
+    ][
+      let pourcentage min list (item 0 taskstates /( (item 1 taskstates) +  (item 0 taskstates)))  (item 1 taskstates /( (item 1 taskstates) +  (item 0 taskstates)))
+      set refreshlimit 0.1836 * pourcentage
+    ]
+
+
+
+
+    set refreshrate refreshrate + 1
+
+  ]
+  set taskstates ( map [ [a b] -> a - b ] [50 50] taskstates)
+
+
+
+
+
+  if refreshrate > refreshlimit [
     ask brain myId[
 
-      set refreshrate update-interval
+      set refreshrate 0
 
 
       let j 0
@@ -316,6 +333,7 @@ to setup-agents
     set datalist []
     set label who
     set refreshrate one-of [1 2 3 4 5 6]
+    set refreshlimit update-interval
   ]
 end
 to setup-graph
@@ -541,7 +559,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "plot count brains with [color = blue]" "plot count brains with [color = blue]"
+"default" 1.0 0 -16777216 true "plot count brains with [color = blue]" "plot count brains with [color = red]"
 
 PLOT
 860
