@@ -23,106 +23,66 @@ to setup
   print "root : "
 
   ;Point d'entrée
-  elect-root
-  ask brain globalroot [
-    print who
-    set info-tasks insert-item 0 info-tasks type2
-    set info-tasks insert-item 0 info-tasks type1
-    let newdata 0
-    let mywho who
-    let savedinfo-tasks info-tasks
+  ifelse initialize [
+    ask brains [
+      set info-tasks insert-item 0 info-tasks type2
+      set info-tasks insert-item 0 info-tasks type1
+      let newdata 0
+      let mywho who
+      let savedinfo-tasks info-tasks
+      let choix random-float 1
+      ifelse choix < initial-ratio [
+        set color blue
 
-    hatch-infos 1 [
-      set newData who ;pour pouvoir y fqire ref apres
-      set brainId mywho
-      set status -1
-      set taskslist savedinfo-tasks
-      set timestamp -1
+        hatch-infos 1 [
+          set newData who ;pour pouvoir y fqire ref apres
+          set brainId mywho
+          set status 0
+          set taskslist savedinfo-tasks
+          set timestamp -1
+        ]
+      ][
+        set color red
+
+        hatch-infos 1 [
+          set newData who ;pour pouvoir y fqire ref apres
+          set brainId mywho
+          set status 1
+          set taskslist savedinfo-tasks
+          set timestamp -1
+        ]
+      ]
+
+
+      set datalist insert-item 0 datalist ( info newData )
+
     ]
-
-    set datalist insert-item 0 datalist ( info newData )
-
   ]
+  [
+    ask one-of brains  [
+      print who
+      set info-tasks insert-item 0 info-tasks type2
+      set info-tasks insert-item 0 info-tasks type1
+      let newdata 0
+      let mywho who
+      let savedinfo-tasks info-tasks
 
+      hatch-infos 1 [
+        set newData who ;pour pouvoir y fqire ref apres
+        set brainId mywho
+        set status -1
+        set taskslist savedinfo-tasks
+        set timestamp -1
+      ]
+
+      set datalist insert-item 0 datalist ( info newData )
+
+    ]
+  ]
 
   reset-ticks
 end
-to elect-root ;; va trouver le neud le plus proche de tous les autres
 
-  let minimum number-brains * number-brains
-  let indiceMinimum 0
-  let i 0
-
-    while [i < number-brains][ ;; pour chaque noeud, on va calculer la somme des distances qui le sépare des autres noeuds
-
-      let liste list (0)(0) ;; cette liste va contenir à l'indice j la distance entre le noeud d'indice j et le noeud etudié i
-      let j 0
-      let level 1 ;; level est la distance à laquelle on se situe du noeud i étudié
-
-
-      ask brain i[ ;; premiere étape : on crée la liste de taille number-brains en mettant des 1 pour les voisins du noeud étudié et des number-brains - 1 ailleurs
-        while [j < number-brains][
-          set liste insert-item j liste (number-brains - 1) ;; on inititalise les distances à la distance maximale possible
-
-          if link-neighbor? brain j[
-            set liste replace-item j liste level
-          ]
-        set j j + 1
-       ]
-      ]
-    set liste replace-item i liste 0 ;; on met une distance de 0 pour le noeud étudié
-    set level level + 1
-    let q 0
-    while [level < number-brains][ ;; dans le pire des cas, si tous les noeuds sont allignés on a au maximum number-brains - 1 levels
-                               ;; on va donc regarder quels sont les voisins des voisins, tout en enregistrant la distance au noeud étudié dans la liste
-      let k 0
-      while [k < number-brains][
-        if item k liste = level - 1[ ;; si le noeud k est du niveau (level - 1) alors on va chercher ses voisins encore non connéctés pour les mettres au niveau level
-          ask brain k[
-            let n 0
-            while [n < number-brains][
-
-              if (link-neighbor? brain n) and (item n liste > level)[ ;; si le noeud n est voisin du noeud k et qu'il n'a pas encore été connecté au réseau alors on le connecte en indiquant qu'il est à une distance de level du noeud étudié
-                set liste replace-item n liste level
-              ]
-              set n n + 1
-            ]
-
-         ]
-
-
-        ]
-
-
-        set k k + 1
-      ]
-
-      set level level + 1
-    ]
-
-    let power 0
-    let p 0
-
-    while[p < number-brains][
-      set power power + item p liste
-      set p p + 1
-    ]
-
-    if power <= minimum[
-
-      set minimum power
-      set indiceMinimum i
-    ]
-    set i i + 1
-    ]
-
-  set globalroot indiceMinimum
-  ask brain indiceMinimum[ ;; indiceMinimum est l'indice du noeud racine
-    set color yellow
-
-  ]
-
-end
 to go
   ask brains[
     ;On choisit au hasard avec une probabilité uniforme un voisin avec lequel on va communiquer
@@ -135,7 +95,7 @@ to go
 
 
   ]
-  if ticks > 5000 [stop]
+
   tick
 end
 
@@ -275,7 +235,7 @@ to updateTask [myId]
 
 
 
-  let taskstates map [ netlogoctropnul -> 0 ]  [50 50] ;newInfoList
+  let taskstates map [ netlogoctropnul -> 0 ]  [30 30] ;newInfoList
   foreach datalist[
     dataitem ->
     ask dataitem [
@@ -293,7 +253,10 @@ to updateTask [myId]
       set refreshlimit 0
     ][
       let pourcentage min list (item 0 taskstates /( (item 1 taskstates) +  (item 0 taskstates)))  (item 1 taskstates /( (item 1 taskstates) +  (item 0 taskstates)))
-      set refreshlimit 0.2 * pourcentage
+      ;set refreshlimit (75 * pourcentage * pourcentage ) - (17.5 * pourcentage)
+      set refreshlimit ((exp (10 * pourcentage)) - 1)
+
+
     ]
 
 
@@ -302,7 +265,7 @@ to updateTask [myId]
     set refreshrate refreshrate + 1
 
   ]
-  set taskstates ( map [ [a b] -> a - b ] [50 50] taskstates)
+  set taskstates ( map [ [a b] -> a - b ] [30 30] taskstates)
 
 
 
@@ -369,33 +332,7 @@ end
 
 
 
-to update-target [myTarget received-list sender-id]
 
-  ifelse myTarget != nobody[ ; au cas ou s'il n'y a pas de voisin
-    ask myTarget[
-
-      if available = 0 [ ; S'il n'est pas en train de traiter une task
-        ifelse  (random-float 1) > 0 [ ;Si on choisit task2
-          set mytask 2
-          set color red
-
-
-        ]
-        [;  ELSE Si on choisit task1
-          set mytask 1
-          set color blue
-
-
-        ]
-
-        set available 1
-      ]
-    ]
-  ]
-  [print "no voisin !!!"]
-
-
-end
 to-report occurrences [x the-list]
   report reduce
     [ [occurrence-count next-item] -> ifelse-value (next-item = x) [occurrence-count + 1] [occurrence-count] ] (fput 0 the-list)
@@ -533,7 +470,7 @@ number-brains
 number-brains
 0
 100
-38.0
+60.0
 1
 1
 NIL
@@ -548,7 +485,7 @@ number-connections
 number-connections
 0
 100
-38.0
+27.0
 1
 1
 NIL
@@ -580,7 +517,7 @@ number-type1
 number-type1
 0
 100
-19.0
+50.0
 1
 1
 NIL
@@ -595,7 +532,7 @@ number-type2
 number-type2
 0
 100
-19.0
+78.0
 1
 1
 NIL
@@ -677,6 +614,32 @@ interval
 19
 3.0
 1
+1
+NIL
+HORIZONTAL
+
+SWITCH
+59
+377
+162
+410
+initialize
+initialize
+0
+1
+-1000
+
+SLIDER
+16
+342
+188
+375
+initial-ratio
+initial-ratio
+0
+1
+0.82
+0.01
 1
 NIL
 HORIZONTAL
