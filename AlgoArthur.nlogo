@@ -1,37 +1,6 @@
 breed [brains brain]
-brains-own [available mytask info-tasks]
-
-
-to generate-tree
-  clear-all
-  ask patches [
-    set pcolor white
-  ]
-
-  create-brains 1 [
-    set shape "circle"
-    setxy random 30 - 15 random 30 - 15
-  ]
-
-  let i 1
-  while [i < number-brains][
-    create-brains 1 [
-      set shape "circle"
-      setxy random 30 - 15 random 30 - 15
-    ]
-
-    ask brain i [
-      create-link-with one-of other brains
-    ]
-
-    set i i + 1
-  ]
-
-  setup-agents
-
-  layout-radial brains links brain 0
-
-end
+brains-own [available mytask estimation-tasks old-estimation-tasks]
+globals [number-task0 number-task1]
 
 to generate-graph
   clear-all
@@ -74,84 +43,152 @@ to generate-graph
 
 end
 
-to generate-fully-connected
-  clear-all
-  ask patches [
-    set pcolor white
-  ]
+to setup-agents
+  ask brains[
+    set available 0
 
-  create-brains number-brains [
-    set shape "circle"
-    setxy random 30 - 15 random 30 - 15
-  ]
+    set mytask 1
+    let r random-float 1
+    if r < task-repartition [
+      set mytask 0
+    ]
 
-  ask brains [
-    ask other brains [
-      create-link-with myself
+    if initiate-random [
+      set mytask random 2
+    ]
+
+    set estimation-tasks list 0 0
+    set estimation-tasks replace-item mytask estimation-tasks 1
+    set old-estimation-tasks estimation-tasks
+
+    set color blue
+    if mytask = 1 [
+      set color red
     ]
   ]
 
-  setup-agents
+  set number-task0 0
+  set number-task1 0
 
-  layout-radial brains links brain 0
+  ask brains [
+    if mytask = 0 [
+      set number-task0 number-task0 + 1
+    ]
+
+    if mytask = 1 [
+      set number-task1 number-task1 + 1
+    ]
+  ]
 
 end
 
-to generate-small-world
-  clear-all
-  ask patches [
-    set pcolor white
+to go
+  set alpha alpha - 0.01
+
+  repeat int(number-brains / 2) [
+    observe
   ]
 
-  create-brains number-brains [
-    set shape "circle"
+  ask brains [
+    adjust-task
   ]
 
-  layout-circle (sort brains) max-pxcor - 1
+  ask brains [
+    set estimation-tasks list 0 0
+    set estimation-tasks replace-item mytask estimation-tasks 1
+    set old-estimation-tasks estimation-tasks
+  ]
 
-  let i 0
-  while [i < number-brains][
-    ask brain i [
-      create-link-with brain ((i + 1) mod number-brains)
-      create-link-with brain ((i + 2) mod number-brains)
+  set number-task0 0
+  set number-task1 0
+
+  ask brains [
+    if mytask = 0 [
+      set number-task0 number-task0 + 1
     ]
-    set i i + 1
+
+    if mytask = 1 [
+      set number-task1 number-task1 + 1
+    ]
   ]
 
-  ask links [
-    if (random-float 1) < 0.4 [
-      let node1 end1
-      if [count link-neighbors] of end1 < (number-brains - 1) [
-        let node2 one-of brains with [(self != node1) and (not link-neighbor? node1)]
-        ask node1 [
-          create-link-with node2
-        ]
-        die
+end
+
+to observe
+  ask brains [
+    let lst old-estimation-tasks
+
+    let v 0
+    ask link-neighbors [
+      set v v + 1
+    ]
+
+    ask link-neighbors [
+      let i 0
+      while [i < length lst][
+        let n1 item i lst
+        let n2 item i old-estimation-tasks
+        set lst replace-item i lst (n1 + n2)
+
+        set i i + 1
+      ]
+    ]
+
+    let i 0
+    let s 0
+    while [i < length lst][
+      let n item i lst
+      ;set lst replace-item i lst (n / v)
+      ;set n item i lst
+      set s s + n
+      set i i + 1
+    ]
+
+    set i 0
+    while [i < length lst][
+      let n item i lst
+      set lst replace-item i lst (n / s)
+      set i i + 1
+    ]
+
+    set estimation-tasks lst
+  ]
+
+  ask brains [
+    set old-estimation-tasks estimation-tasks
+    ;show estimation-tasks
+  ]
+
+end
+
+to adjust-task
+  if mytask = 0 [
+    if item 0 estimation-tasks > task-repartition [
+      let r random-float 1
+      if r < alpha [
+        set mytask 1
+        set color red
       ]
     ]
   ]
 
-  setup-agents
-
-end
-
-
-to setup-agents
-  ask brains[
-    set available 0
-    set mytask 0
-    set info-tasks []
-    set color green
-    set label-color green
+  if mytask = 1 [
+    if item 1 estimation-tasks > (1 - task-repartition) [
+      let r random-float 1
+      if r < alpha [
+        set mytask 0
+        set color blue
+      ]
+    ]
   ]
 
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-408
-42
-845
-480
+457
+43
+894
+481
 -1
 -1
 13.0
@@ -175,44 +212,42 @@ ticks
 30.0
 
 SLIDER
-19
+43
+55
+215
 88
-191
-121
 number-brains
 number-brains
 2
 1000
-587.0
+100.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+231
+55
+436
+88
+number-connections
+number-connections
+1
+3000
+1074.0
 1
 1
 NIL
 HORIZONTAL
 
 BUTTON
-237
-285
-383
-318
+70
+158
+216
+191
 NIL
-generate-tree\n
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-172
-237
-384
-270
-NIL
-generate-fully-connected\n
+generate-graph
 NIL
 1
 T
@@ -224,13 +259,13 @@ NIL
 1
 
 BUTTON
-201
-332
-383
-365
+230
+157
+293
+190
 NIL
-generate-small-world
-NIL
+go
+T
 1
 T
 OBSERVER
@@ -241,36 +276,63 @@ NIL
 1
 
 SLIDER
-192
-89
-397
-122
-number-connections
-number-connections
+69
+115
+241
+148
+task-repartition
+task-repartition
 0
-5000
-1474.0
 1
+0.2
+0.01
 1
 NIL
 HORIZONTAL
 
-BUTTON
-249
-188
-395
-221
-NIL
-generate-graph\n
-NIL
+SWITCH
+272
+111
+438
+144
+initiate-random
+initiate-random
+0
 1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
+-1000
+
+INPUTBOX
+126
+295
+287
+355
+alpha
+-0.13000000000000012
 1
+0
+Number
+
+MONITOR
+50
+228
+200
+273
+number task 0 (blue)
+number-task0
+17
+1
+11
+
+MONITOR
+275
+223
+419
+268
+number task 1 (red)
+number-task1
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
