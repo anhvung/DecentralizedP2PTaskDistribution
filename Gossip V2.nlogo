@@ -1,13 +1,15 @@
 breed [brains brain]
-brains-own [available mytask info-tasks datalist refreshrate refreshlimit]
-breed [infos info]
-infos-own [ brainId status taskslist timestamp ]
-globals [types type1 type2 numberoftask1 numberoftask2 starttingpoint visited update-interval globalroot]
+brains-own [available mytask info-tasks refreshrate refreshlimit LbrainId Lstatus Ltaskslist Ltimestamp]
+
+globals [types type1 type2 numberoftask1 numberoftask2 starttingpoint visited update-interval globalroot globalTasks]
 to setup
   clear-all
   ask patches[
     set pcolor white
   ]
+  set globalTasks []
+  set globalTasks lput number-type1 globalTasks
+   set globalTasks lput number-type2 globalTasks
   set types [red blue green]
   ;CREATION DU GRAPHEAv
   setup-graph
@@ -20,7 +22,7 @@ to setup
 
   ;Point d'entrée
   set starttingpoint one-of brains
-  print "root : "
+
 
   ;Point d'entrée
   ifelse initialize [
@@ -28,54 +30,42 @@ to setup
       set info-tasks insert-item 0 info-tasks type2
       set info-tasks insert-item 0 info-tasks type1
       let newdata 0
-      let mywho who
+
       let savedinfo-tasks info-tasks
       let choix random-float 1
       ifelse choix < initial-ratio [
         set color blue
 
-        hatch-infos 1 [
-          set newData who ;pour pouvoir y fqire ref apres
-          set brainId mywho
-          set status 0
-          set taskslist savedinfo-tasks
-          set timestamp -1
-        ]
+        set LbrainId lput who LbrainId
+        set Lstatus lput 0 Lstatus
+        set Ltaskslist lput savedinfo-tasks Ltaskslist
+        set Ltimestamp lput -1 Ltimestamp
       ][
         set color red
 
-        hatch-infos 1 [
-          set newData who ;pour pouvoir y fqire ref apres
-          set brainId mywho
-          set status 1
-          set taskslist savedinfo-tasks
-          set timestamp -1
-        ]
+        set LbrainId lput who LbrainId
+        set Lstatus lput 1 Lstatus
+        set Ltaskslist lput savedinfo-tasks Ltaskslist
+        set Ltimestamp lput -1 Ltimestamp
       ]
 
 
-      set datalist insert-item 0 datalist ( info newData )
+
 
     ]
   ]
   [
     ask one-of brains  [
-      print who
+
       set info-tasks insert-item 0 info-tasks type2
       set info-tasks insert-item 0 info-tasks type1
       let newdata 0
-      let mywho who
+
       let savedinfo-tasks info-tasks
-
-      hatch-infos 1 [
-        set newData who ;pour pouvoir y fqire ref apres
-        set brainId mywho
-        set status -1
-        set taskslist savedinfo-tasks
-        set timestamp -1
-      ]
-
-      set datalist insert-item 0 datalist ( info newData )
+      set LbrainId lput who LbrainId
+      set Lstatus lput -1 Lstatus
+      set Ltaskslist lput savedinfo-tasks Ltaskslist
+      set Ltimestamp lput -1 Ltimestamp
 
     ]
   ]
@@ -91,7 +81,7 @@ to go
 
     ;Si il a une information à donner (Sinon pas la peine de communiquer)
 
-    process-both target datalist who
+    process-both target (brain who)
 
 
   ]
@@ -99,78 +89,76 @@ to go
   tick
 end
 
-to process-both [myTarget received-list sender-id];update both sender and receiver data and update their task
-  ask myTarget[
-    prepareData who
-    prepareData sender-id
-    updateData who received-list
-    updateData sender-id datalist
-    updateTask who
-    updateTask sender-id
+to process-both [myTarget me];update both sender and receiver data and update their task
 
-  ]
+  prepareData me
+
+  updateData myTarget me
+
+  updateTask myTarget
+
+
+
 end
 
-to prepareData [myId]
+to prepareData [mybrain]
+  ask mybrain[
   let myWho who
   let k 0
   let exists false
 
-  while [k != length datalist][
+  foreach LbrainId [ x ->
 
-    ask item k datalist[
-      if brainId = myWho [
+    if x = myWho [
         set exists true
       ]
-    ]
-    set k k + 1
-  ]
 
+  ]
   if exists = false[
-    let newData 0
-    let mytasksave 0
-    ask brain myId[
-      set mytasksave  mytask
-    ]
-    hatch-infos 1 [
-      set newData who ;pour pouvoir y fqire ref apres
-      set brainId mywho
-      set status mytasksave
-      set taskslist []
-      set timestamp -1
-    ]
-
-    set datalist insert-item 0 datalist ( info newData )
+    set LbrainId lput who LbrainId
+      set Lstatus lput mytask Lstatus
+      set Ltaskslist lput [] Ltaskslist
+      set Ltimestamp lput -1 Ltimestamp
 
   ]
+
+  ]
+
 
 end
-to updateData [myId newList]
-  ask brain myId[
-    let i 0
-    while [i != length newList][
+to updateData [myTarget myBrain]
+  let RLbrainId []
+  let RLstatus []
+  let RLtaskslist []
+  let RLtimestamp []
 
-      let received-id 0
-      let received-time 0
-      ask item i newlist[
-        set received-id brainId
-        set received-time timestamp
-      ]
+  ask myBrain [
+    set RLbrainId LbrainId
+    set RLstatus Lstatus
+    set RLtaskslist Ltaskslist
+    set RLtimestamp Ltimestamp
+  ]
+
+  ask myTarget[
+    let i 0
+    while [i != length RLbrainId][
+
+      let received-id item i RLbrainId
+      let received-time item i RLtimestamp
       let k 0
-      let fixedlength length datalist
+      let fixedlength length LbrainId
       let notexsits true
       while [k != fixedlength][
 
-        let my-id 0
-        let my-time 0
-        ask item k datalist[
-          set my-id brainId
-          set my-time timestamp
-        ]
+        let my-id item k LbrainId
+        let my-time item k Ltimestamp
+
         if my-id = received-id [
           set notexsits false
           if my-time < received-time[
-            set datalist replace-item k datalist ( item i newlist )
+            set Lstatus  replace-item k Lstatus  ( item i RLstatus  )
+            set Ltaskslist   replace-item k Ltaskslist   ( item i RLtaskslist   )
+            set Ltimestamp   replace-item k Ltimestamp   ( item i RLtimestamp   )
 
           ]
         ]
@@ -179,7 +167,11 @@ to updateData [myId newList]
       ]
 
       if notexsits [
-        set datalist lput ( item i newlist ) datalist
+        set LbrainId   lput (item i RLbrainId ) LbrainId
+        set Lstatus  lput (item i RLstatus) Lstatus
+        set Ltaskslist lput (item i RLtaskslist ) Ltaskslist
+        set Ltimestamp lput (item i RLtimestamp ) Ltimestamp
+
       ]
       set i i + 1
     ]
@@ -188,73 +180,70 @@ to updateData [myId newList]
 
 
 end
-to updateTask [myId]
+to updateTask [myTarget]
 
+  ask myTarget [
 
+    let newInfoList []
+    let maxTime 0
+    let myIdInList 0
+    let myStatus 0
+    let myTimeStamp 0
 
-  let newInfoList []
-  let maxTime 0
-  let myIdInList 0
-  let myStatus 0
-  let myTimeStamp 0
-  let myWho who
-  let i 0
-  while [i != length datalist][
+    let i 0
+    while [i != length LbrainId ][
 
-    let tmp-time 0
-    let tmp-list []
-    ask item i datalist[
-      set tmp-time timestamp
-      set tmp-list taskslist
-      if brainId = myWho [
+      let tmp-time 0
+      let tmp-list []
+
+      if item i LbrainId = who [
         set myIdInList  i
       ]
-    ]
-
-    if tmp-time > maxTime and length tmp-list > 0[
-      set maxTime tmp-time
-      set newInfoList tmp-list
-    ]
-    set i i + 1
-  ]
+      set tmp-time item i Ltimestamp
+      set tmp-list item i Ltaskslist
 
 
-  ;weuifhweiopfhuasioufaswofaswugfhuioawf
-  let tempdatalist []
-  ask brain myId[set tempdatalist datalist]
-  ask item myIdInList datalist[
-    set myStatus status
-    set myTimeStamp timestamp
-  ]
-
-
-
-
-
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-
-  let taskstates map [ netlogoctropnul -> 0 ]  [20 20] ;newInfoList
-  foreach datalist[
-    dataitem ->
-    ask dataitem [
-      if status >= 0 [
-        set taskstates replace-item status taskstates (( item status taskstates ) + 1)
+      if tmp-time > maxTime and length tmp-list > 0[
+        set maxTime tmp-time
+        set newInfoList tmp-list
       ]
+      set i i + 1
     ]
-  ]
 
-  ; set taskstates ( map [ [ currentvalue maxvalue ] -> maxvalue - currentvalue ] taskstates newInfoList)
-  ;print taskstates
 
-  ask brain myId[
+    ;weuifhweiopfhuasioufaswofaswugfhuioawf
+      set myStatus item myIdInList Lstatus
+      set myTimeStamp item myIdInList Ltimestamp
+
+
+
+
+
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+    let taskstates map [ netlogoctropnul -> 0 ] globalTasks ;newInfoList
+    foreach Lstatus [
+      x ->
+
+        if x >= 0 [
+          set taskstates replace-item x taskstates (( item x taskstates ) + 1)
+        ]
+
+    ]
+
+    ; set taskstates ( map [ [ currentvalue maxvalue ] -> maxvalue - currentvalue ] taskstates newInfoList)
+    ;print taskstates
+
+
     ifelse 0 = (item 1 taskstates) +  (item 0 taskstates) [
       set refreshlimit 0
     ][
       let pourcentage min list (item 0 taskstates /( (item 1 taskstates) +  (item 0 taskstates)))  (item 1 taskstates /( (item 1 taskstates) +  (item 0 taskstates)))
       ;set refreshlimit (75 * pourcentage * pourcentage ) - (17.5 * pourcentage)
-      set refreshlimit ((exp (10 * pourcentage)) - 1) * 1
+     ; set refreshlimit ((exp (10 * pourcentage)) - 1)
 
 
     ]
@@ -264,69 +253,64 @@ to updateTask [myId]
 
     set refreshrate refreshrate + 1
 
+    set taskstates ( map [ [a b] -> a - b ] globalTasks taskstates)
+
+
+
+
+
+    if refreshrate > refreshlimit [
+
+
+        set refreshrate 0
+
+
+        let j 0
+        let newTask -1
+        let tmpValue 0
+        while [j != length taskstates][
+
+
+          if item j taskstates > tmpValue [
+            set tmpValue item j taskstates
+            set newTask j
+          ]
+
+          set j j + 1
+        ];end while
+        if  newTask != -1 and  newTask != mytask [
+
+          if newTask = 1[
+            set color red
+            set myStatus 1
+          ]
+          if newTask = 0[
+            set color blue
+            set myStatus 0
+          ]
+
+          set mytask newTask
+
+
+
+        ]
+
+
+    ];end if
+
+
+
+
+
+
+
+    set Lstatus   replace-item myIdInList Lstatus  (myStatus)
+    set Ltaskslist    replace-item myIdInList Ltaskslist   (newInfoList)
+    set Ltimestamp    replace-item myIdInList Ltimestamp   (ticks)
+
+    set info-tasks newInfoList
+
   ]
-  set taskstates ( map [ [a b] -> a - b ] [20 20] taskstates)
-
-
-
-
-
-  if refreshrate > refreshlimit [
-    ask brain myId[
-
-      set refreshrate 0
-
-
-      let j 0
-      let newTask -1
-      let tmpValue 0
-      while [j != length taskstates][
-
-
-        if item j taskstates > tmpValue [
-          set tmpValue item j taskstates
-          set newTask j
-        ]
-
-        set j j + 1
-      ];end while
-      if  newTask != -1 and  newTask != mytask [
-
-        if newTask = 1[
-          set color red
-          set myStatus 1
-        ]
-        if newTask = 0[
-          set color blue
-          set myStatus 0
-        ]
-
-        set mytask newTask
-
-
-
-      ]
-    ]
-
-  ];end if
-
-
-
-  ; update son propre tasklist dans param interne et datalist
-  let newData 0
-  hatch-infos 1 [
-    set newData who ;pour pouvoir y fqire ref apres
-    set brainId mywho
-    set status myStatus
-    set taskslist newInfoList
-    set timestamp ticks
-  ]
-  ;enfin on peut update
-
-  set datalist replace-item myIdInList datalist ( info newData )
-  set info-tasks newInfoList
-
-
 
 end
 
@@ -343,7 +327,10 @@ to setup-agents
     set available 0
     set mytask -1
     set info-tasks []
-    set datalist []
+    set LbrainId  []
+     set Lstatus   []
+     set Ltaskslist   []
+     set Ltimestamp   []
     set label who
     set refreshrate one-of [1 2 3 4 5 6]
     set refreshlimit update-interval
@@ -470,7 +457,7 @@ number-brains
 number-brains
 0
 100
-60.0
+100.0
 1
 1
 NIL
@@ -485,7 +472,7 @@ number-connections
 number-connections
 0
 100
-27.0
+50.0
 1
 1
 NIL
@@ -532,7 +519,7 @@ number-type2
 number-type2
 0
 100
-78.0
+50.0
 1
 1
 NIL
