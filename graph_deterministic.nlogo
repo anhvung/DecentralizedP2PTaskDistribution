@@ -307,8 +307,8 @@ to dfs [n] ;parcours en profondeur recusif
 end
 to go
   ask brains with [contains-update-agent = 1][
-    let target one-of out-link-neighbors with [mytask = 0]
-    let n  who
+    let target one-of (out-link-neighbors with [mytask = 0])
+    let n who
     ifelse target != nobody [ ;Si il existe un voisin sans tâche, on propage l'information
       update-target target info-tasks
       set contains-update-agent 0
@@ -323,7 +323,7 @@ to go
       ask target [
         set contains-update-agent 1
       ]
-      ]
+    ]
   ]
   tick
 end
@@ -333,31 +333,30 @@ to update-target [myTarget receinved-info-tasks]
     ask myTarget[
       let n length receinved-info-tasks
       let i 0
+      let done false
       if available = 0 [ ; S'il n'est pas en train de traiter une task
-        let done false
         while [(done = false) and (i < n)] [
-          ifelse item i receinved-info-tasks > 0 [
-            set mytask i
+          ifelse (item i receinved-info-tasks) > 0 [
+            set mytask i + 1
             set color item i types
+            set available 1
             set done true
           ][
             set i i + 1
           ]
         ]
-        set available 1
       ]
       set info-tasks []
       let j 1
       while [j <= n] [
         let myntask item (n - j) receinved-info-tasks
-        ifelse n - j = i [
+        ifelse (n - j = i) and (done = true) [
           set info-tasks insert-item 0 info-tasks (myntask - 1)
         ][
           set info-tasks insert-item 0 info-tasks myntask
         ]
         set j j + 1
       ]
-      print info-tasks
     ]
   ]
   [print "no voisin !!!"]
@@ -450,7 +449,7 @@ NUMBER-CONNECTIONS
 NUMBER-CONNECTIONS
 0
 1000
-94.0
+69.0
 1
 1
 NIL
