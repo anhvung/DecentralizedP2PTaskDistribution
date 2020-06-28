@@ -1,6 +1,6 @@
 breed [brains brain]
 brains-own [available mytask info-tasks contains-update-agent parent-brain-id]
-globals [type1 type2 visited info globalroot]
+globals [types type1 type2 visited info globalroot]
 
 to generate-tree
   clear-all
@@ -136,7 +136,8 @@ to generate-small-world
 end
 
 to setup
-   ask brains[set color black]
+  ask brains[set color black]
+  set types [blue red]
 
 
   set type1 number-type1
@@ -328,37 +329,35 @@ to go
 end
 
 to update-target [myTarget receinved-info-tasks]
-  let myntask1 item 0 receinved-info-tasks
-  let myntask2 item 1 receinved-info-tasks
   ifelse myTarget != nobody[ ; au cas ou s'il n'y a pas de voisin
     ask myTarget[
+      let n length receinved-info-tasks
+      let i 0
       if available = 0 [ ; S'il n'est pas en train de traiter une task
-        if myntask1 > 0 and myntask2 = 0[
-          set mytask 1
-          set color blue
-          set myntask1 myntask1 - 1
-        ]
-        if myntask1 = 0 and myntask2 > 0[
-          set mytask 2
-          set color red
-          set myntask2 myntask2 - 1
-        ]
-        if myntask1 > 0 and myntask2 > 0[
-          ifelse random-float 1 > 0.5[
-            set mytask 1
-            set color blue
-            set myntask1 myntask1 - 1
+        let done false
+        while [(done = false) and (i < n)] [
+          ifelse item i receinved-info-tasks > 0 [
+            set mytask i
+            set color item i types
+            set done true
           ][
-            set mytask 2
-            set color red
-            set myntask2 myntask2 - 1
+            set i i + 1
           ]
         ]
         set available 1
       ]
       set info-tasks []
-      set info-tasks insert-item 0 info-tasks myntask2
-      set info-tasks insert-item 0 info-tasks myntask1
+      let j 1
+      while [j <= n] [
+        let myntask item (n - j) receinved-info-tasks
+        ifelse n - j = i [
+          set info-tasks insert-item 0 info-tasks (myntask - 1)
+        ][
+          set info-tasks insert-item 0 info-tasks myntask
+        ]
+        set j j + 1
+      ]
+      print info-tasks
     ]
   ]
   [print "no voisin !!!"]
@@ -406,7 +405,7 @@ NUMBER-TYPE1
 NUMBER-TYPE1
 0
 5000
-5000.0
+96.0
 1
 1
 NIL
@@ -421,7 +420,7 @@ NUMBER-TYPE2
 NUMBER-TYPE2
 0
 5000
-5000.0
+127.0
 1
 1
 NIL
@@ -436,7 +435,7 @@ NUMBER-BRAINS
 NUMBER-BRAINS
 0
 10000
-10000.0
+255.0
 1
 1
 NIL
@@ -451,7 +450,7 @@ NUMBER-CONNECTIONS
 NUMBER-CONNECTIONS
 0
 1000
-669.0
+94.0
 1
 1
 NIL
