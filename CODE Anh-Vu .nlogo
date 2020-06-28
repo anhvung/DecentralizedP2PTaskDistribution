@@ -1,9 +1,160 @@
 breed [brains brain]
 brains-own [available mytask info-tasks ]
-globals [types type1 type2 numberoftask1 numberoftask2 starttingpoint visited globalroot]
+globals [types type1 type2 numberoftask1 numberoftask2 starttingpoint visited ]
 
 
 
+
+;;;;;;;;;;;;;;;;;;;; SETUP ;;;;;;;;;;;;;;;;
+
+to setup
+
+  (ifelse Graph-type = "fully connected" [
+    generate-fully-connected
+    ]
+    Graph-type = "graph" [
+      generate-graph
+    ]
+    Graph-type = "tree" [
+      generate-tree
+    ]
+    Graph-type = "small word" [
+      generate-small-world
+  ])
+
+  (ifelse Algo = "Probabilistic" [
+    setup-probabilistic
+    ]
+    Algo = "Deterministic" [
+      setup-deterministic
+    ]
+    Algo = "Gossip" [
+       setup-gossip
+  ])
+
+
+
+  reset-ticks
+end
+
+
+to setup-probabilistic
+  ask brains[
+    set available 0
+    set mytask 0
+    set info-tasks []
+    set label-color black
+  ]
+  set type1 number-type1
+  set type2 number-type2
+
+  ask  one-of brains [
+    let ptask1 (type1 / (type1 + type2))
+    let ptask2 (type2 / (type1 + type2))
+    set info-tasks insert-item 0 info-tasks ptask2
+    set info-tasks insert-item 0 info-tasks ptask1
+    update-target self info-tasks
+  ]
+end
+
+to setup-deterministic
+  ask brains[
+    set available 0
+    set mytask 0
+    set info-tasks []
+    set label-color black
+  ]
+  set type1 number-type1
+  set type2 number-type2
+
+  ask  one-of brains [
+    let ptask1 (type1 / (type1 + type2))
+    let ptask2 (type2 / (type1 + type2))
+    set info-tasks insert-item 0 info-tasks ptask2
+    set info-tasks insert-item 0 info-tasks ptask1
+    update-target self info-tasks
+  ]
+end
+
+to setup-gossip
+  ask brains[
+    set available 0
+    set mytask 0
+    set info-tasks []
+    set label-color black
+  ]
+  set type1 number-type1
+  set type2 number-type2
+
+  ask  one-of brains [
+    let ptask1 (type1 / (type1 + type2))
+    let ptask2 (type2 / (type1 + type2))
+    set info-tasks insert-item 0 info-tasks ptask2
+    set info-tasks insert-item 0 info-tasks ptask1
+    update-target self info-tasks
+  ]
+end
+;;;;;;;;;;;;;;;;;;;; END OF SETUP ;;;;;;;;;;;;;;;;
+
+to go
+  ask brains[
+    ;On choisit au hasard avec une probabilité uniforme un voisin avec lequel on va communiquer
+    let target one-of link-neighbors
+
+
+    if length info-tasks > 0[  ;Si il a une information à donner (Sinon pas la peine de communiquer)
+
+      update-target target info-tasks
+    ]
+
+  ]
+
+  tick
+end
+
+
+to update-target [myTarget receinved-info-tasks]
+  let myptask1 item 0 receinved-info-tasks
+  let myptask2 item 1 receinved-info-tasks
+  ifelse myTarget != nobody[ ; au cas ou s'il n'y a pas de voisin
+    ask myTarget[
+      set info-tasks insert-item 0 info-tasks myptask2
+      set info-tasks insert-item 0 info-tasks myptask1
+
+      if available = 0 [ ; S'il n'est pas en train de traiter une task
+        ifelse  (random-float 1) > myptask1 [ ;Si on choisit task2
+          set mytask 2
+          set color red
+
+
+        ]
+        [;  ELSE Si on choisit task1
+          set mytask 1
+          set color blue
+
+
+        ]
+
+        set available 1
+      ]
+    ]
+  ]
+  [print "no voisin !!!"]
+
+
+end
+
+
+
+
+
+to-report occurrences [x the-list]
+  report reduce
+    [ [occurrence-count next-item] -> ifelse-value (next-item = x) [occurrence-count + 1] [occurrence-count] ] (fput 0 the-list)
+end
+
+
+;;;;;;;;;; GRAPH GENERATION ;;;;;;;;;;;;;;;;;;;;;;
 
 to generate-tree
   clear-all
@@ -30,7 +181,7 @@ to generate-tree
     set i i + 1
   ]
 
-  setup-agents
+
 
   layout-radial brains links brain 0
 
@@ -71,7 +222,7 @@ to generate-graph
     set i i + 1
   ]
 
-  setup-agents
+
 
   layout-radial brains links brain 0
 
@@ -94,7 +245,7 @@ to generate-fully-connected
     ]
   ]
 
-  setup-agents
+
 
   layout-radial brains links brain 0
 
@@ -134,65 +285,41 @@ to generate-small-world
     ]
   ]
 
-  setup-agents
+
 
 end
+;;;;;;;;;; END OF GRAPH GENERATION ;;;;;;;;;;;;;;;;;;;;;;
 
+;;;;;;;;;;;;;;;;;;; ELECT ROOT ;;;;;;;;;;;;;;;;;;;;;
 
-
-to setup
-
-  ;CREATION DU GRAPHEAv
-  ask brains[set color black]
-
-
-  set type1 number-type1
-  set type2 number-type2
-
-
-  ;Point d'entrée
-
-
- elect-root
-  ask brain globalroot [
-    let ptask1 (type1 / (type1 + type2))
-    let ptask2 (type2 / (type1 + type2))
-    set info-tasks insert-item 0 info-tasks ptask2
-     set info-tasks insert-item 0 info-tasks ptask1
-    update-target self info-tasks
-  ]
-
-
-  reset-ticks
-end
 to elect-root ;; va trouver le neud le plus proche de tous les autres
 
   let minimum number-brains * number-brains
   let indiceMinimum 0
   let i 0
 
-    while [i < number-brains][ ;; pour chaque noeud, on va calculer la somme des distances qui le sépare des autres noeuds
+  while [i < number-brains][ ;; pour chaque noeud, on va calculer la somme des distances qui le sépare des autres noeuds
 
-      let liste list (0)(0) ;; cette liste va contenir à l'indice j la distance entre le noeud d'indice j et le noeud etudié i
-      let j 0
-      let level 1 ;; level est la distance à laquelle on se situe du noeud i étudié
+    let liste list (0)(0) ;; cette liste va contenir à l'indice j la distance entre le noeud d'indice j et le noeud etudié i
+    let j 0
+    let level 1 ;; level est la distance à laquelle on se situe du noeud i étudié
 
 
-      ask brain i[ ;; premiere étape : on crée la liste de taille number-brains en mettant des 1 pour les voisins du noeud étudié et des number-brains - 1 ailleurs
-        while [j < number-brains][
-          set liste insert-item j liste (number-brains - 1) ;; on inititalise les distances à la distance maximale possible
+    ask brain i[ ;; premiere étape : on crée la liste de taille number-brains en mettant des 1 pour les voisins du noeud étudié et des number-brains - 1 ailleurs
+      while [j < number-brains][
+        set liste insert-item j liste (number-brains - 1) ;; on inititalise les distances à la distance maximale possible
 
-          if link-neighbor? brain j[
-            set liste replace-item j liste level
-          ]
+        if link-neighbor? brain j[
+          set liste replace-item j liste level
+        ]
         set j j + 1
-       ]
       ]
+    ]
     set liste replace-item i liste 0 ;; on met une distance de 0 pour le noeud étudié
     set level level + 1
     let q 0
     while [level < number-brains][ ;; dans le pire des cas, si tous les noeuds sont allignés on a au maximum number-brains - 1 levels
-                               ;; on va donc regarder quels sont les voisins des voisins, tout en enregistrant la distance au noeud étudié dans la liste
+                                   ;; on va donc regarder quels sont les voisins des voisins, tout en enregistrant la distance au noeud étudié dans la liste
       let k 0
       while [k < number-brains][
         if item k liste = level - 1[ ;; si le noeud k est du niveau (level - 1) alors on va chercher ses voisins encore non connéctés pour les mettres au niveau level
@@ -206,7 +333,7 @@ to elect-root ;; va trouver le neud le plus proche de tous les autres
               set n n + 1
             ]
 
-         ]
+          ]
 
 
         ]
@@ -232,141 +359,19 @@ to elect-root ;; va trouver le neud le plus proche de tous les autres
       set indiceMinimum i
     ]
     set i i + 1
-    ]
+  ]
 
-  set globalroot indiceMinimum
+  ask brain indiceMinimum [
+    set color  red
+  ]
   ask brain indiceMinimum[ ;; indiceMinimum est l'indice du noeud racine
     set color yellow
 
   ]
 
 end
-to setup-agents
-   ask brains[
-    set available 0
-    set mytask 0
-    set info-tasks []
-    set label-color green
-  ]
-end
-to setup-graph
-  create-brains number-brains[
-    set shape "circle"
-    setxy random-pxcor random-pycor
-    set color green
-  ]
-  ;CREATION DU GRAPHE (Liens)
-  repeat number-connections[
-    ask one-of brains[
-      create-link-with one-of other brains
-    ]
-  ]
-  complete-graph
-end
 
-to complete-graph   ;On complete pour avoir un graphe connexe
-  set visited  n-values number-brains [0]
-  let added-brain nobody
-  dfs 0
-  let index-a-1 []
-  let index-a-0 []
-  let index 0
-  while [index != length visited][
-
-
-
-    ifelse item index visited = 1[
-      set index-a-1 insert-item 0 index-a-1 index
-    ]
-    [
-      set index-a-0 insert-item 0 index-a-0 index
-    ]
-    set index index + 1
-  ]
-
-
-  let taille-comp-connexe length index-a-1
-
-  if taille-comp-connexe < number-brains[
-    let auhasard0 one-of index-a-0
-    let auhasard1 one-of index-a-1
-    ask brain auhasard1[
-      create-link-with brain auhasard0
-    ]
-     ask brain auhasard0[
-      create-link-with brain auhasard1
-    ]
-
-    complete-graph
-  ]
-
-
-
-
-end
-
-
-to dfs [n] ;parcours en profondeur recusif
-  if item n visited = 0[
-    set visited replace-item n visited 1
-    ask brain n[
-      ask out-link-neighbors[;pour tous les voisins
-        dfs who
-      ]
-    ]
-  ]
-end
-to go
-  ask brains[
-    ;On choisit au hasard avec une probabilité uniforme un voisin avec lequel on va communiquer
-    let target one-of link-neighbors
-
-
-    if length info-tasks > 0[  ;Si il a une information à donner (Sinon pas la peine de communiquer)
-
-      update-target target info-tasks
-    ]
-
-  ]
-
-  tick
-end
-
-
-to update-target [myTarget receinved-info-tasks]
-  let myptask1 item 0 receinved-info-tasks
-  let myptask2 item 1 receinved-info-tasks
-  ifelse myTarget != nobody[ ; au cas ou s'il n'y a pas de voisin
-    ask myTarget[
-       set info-tasks insert-item 0 info-tasks myptask2
-       set info-tasks insert-item 0 info-tasks myptask1
-
-      if available = 0 [ ; S'il n'est pas en train de traiter une task
-        ifelse  (random-float 1) > myptask1 [ ;Si on choisit task2
-          set mytask 2
-          set color red
-
-
-        ]
-        [;  ELSE Si on choisit task1
-          set mytask 1
-          set color blue
-
-
-        ]
-
-        set available 1
-      ]
-    ]
-  ]
-  [print "no voisin !!!"]
-
-
-end
-to-report occurrences [x the-list]
-  report reduce
-    [ [occurrence-count next-item] -> ifelse-value (next-item = x) [occurrence-count + 1] [occurrence-count] ] (fput 0 the-list)
-end
+;;;;;;;;;;;;;;;;;;; END OF ELECT ROOT ;;;;;;;;;;;;;;;;;;;;;
 @#$#@#$#@
 GRAPHICS-WINDOW
 226
@@ -396,10 +401,10 @@ ticks
 30.0
 
 BUTTON
-13
-51
-76
-84
+17
+121
+80
+154
 NIL
 setup\n
 NIL
@@ -413,10 +418,10 @@ NIL
 1
 
 SLIDER
-10
-109
-182
-142
+14
+277
+186
+310
 number-brains
 number-brains
 0
@@ -428,25 +433,25 @@ NIL
 HORIZONTAL
 
 SLIDER
-10
-154
-182
-187
+14
+322
+186
+355
 number-connections
 number-connections
 0
 1000
-138.0
+146.0
 1
 1
 NIL
 HORIZONTAL
 
 BUTTON
-118
-51
-181
-84
+122
+121
+185
+154
 NIL
 go
 T
@@ -460,10 +465,10 @@ NIL
 1
 
 SLIDER
-12
-201
-184
-234
+16
+369
+188
+402
 number-type1
 number-type1
 0
@@ -475,10 +480,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-10
-240
-182
-273
+14
+408
+186
+441
 number-type2
 number-type2
 0
@@ -554,13 +559,23 @@ NIL
 1
 11
 
+CHOOSER
+28
+10
+166
+55
+Graph-type
+Graph-type
+"fully connected" "graph" "tree" "small word"
+1
+
 BUTTON
-33
-326
-152
-359
+222
+16
+308
+49
 NIL
-generate-graph\n
+elect-root
 NIL
 1
 T
@@ -571,56 +586,15 @@ NIL
 NIL
 1
 
-BUTTON
-19
-281
-191
-314
-NIL
-generate-fully-connected
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-34
-370
-144
-403
-NIL
-generate-tree
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-22
-418
-170
-451
-NIL
-generate-small-world
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
+CHOOSER
+28
+64
+166
+109
+Algo
+Algo
+"Probabilistic" "Deterministic" "Gossip"
+0
 
 @#$#@#$#@
 ## WHAT IS IT?
