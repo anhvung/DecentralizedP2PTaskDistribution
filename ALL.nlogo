@@ -13,7 +13,7 @@ to setup
   (ifelse Graph-type = "fully-connected" [
     generate-fully-connected
     ]
-    Graph-type = "graph" [
+    Graph-type = "random" [
       generate-graph
     ]
     Graph-type = "tree" [
@@ -236,7 +236,6 @@ to PROBABILISTIC-update-target [myTarget receinved-info-tasks]
         [;  ELSE Si on choisit task1
           set mytask 1
           set color blue
-
 
         ]
 
@@ -495,8 +494,8 @@ to GOSSIP-updateTask [myTarget]
 
 
 
-   ; if refreshrate > 0 and ( random ((length Lstatus)* (log (length Lstatus) 2)) < 1 )[
-    if refreshrate > 0 and ( random ((length Lstatus)) < 1 )[
+    ; if refreshrate > 0 and ( random ((length Lstatus)* (log (length Lstatus) 2)) < 1 )[
+    if refreshrate > 0 and ( random-float ((length Lstatus)) < 1 )[
 
 
       set refreshrate 0
@@ -782,10 +781,10 @@ end
 ;;;;;;;;;;;;;;;;;;; END OF ELECT ROOT ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 @#$#@#$#@
 GRAPHICS-WINDOW
-226
-58
-807
-640
+323
+65
+904
+647
 -1
 -1
 17.364
@@ -826,25 +825,25 @@ NIL
 1
 
 SLIDER
-8
-277
-220
+6
+229
 310
+262
 number-brains
 number-brains
 0
 1000
-1000.0
+50.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-4
-322
-221
-355
+5
+274
+309
+307
 number-connections
 number-connections
 0
@@ -857,9 +856,9 @@ HORIZONTAL
 
 BUTTON
 122
-121
+120
 185
-154
+153
 NIL
 go
 T
@@ -873,15 +872,15 @@ NIL
 1
 
 SLIDER
-2
-369
-221
-402
+5
+321
+306
+354
 number-type1
 number-type1
 0
 1000
-500.0
+25.0
 1
 1
 NIL
@@ -889,24 +888,24 @@ HORIZONTAL
 
 SLIDER
 4
-408
-225
-441
+360
+306
+393
 number-type2
 number-type2
 0
 1000
-500.0
+25.0
 1
 1
 NIL
 HORIZONTAL
 
 PLOT
-7
-457
-207
-607
+11
+423
+296
+573
 Task 1
 Tick
 Task1
@@ -921,10 +920,10 @@ PENS
 "default" 1.0 0 -16777216 true "plot count brains with [color = blue]" "plot count brains with [color = blue]"
 
 PLOT
-5
-665
-205
-815
+11
+636
+299
+786
 Task 2
 Tick
 Task 2
@@ -939,28 +938,28 @@ PENS
 "default" 1.0 0 -16777216 true "plot count brains with [color = blue]" "plot count brains with [color = red]"
 
 PLOT
-860
-73
-1599
-701
-Distribution
+953
+67
+1692
+645
+Erreur relative
 Time
 Ratio
 0.0
 10.0
 0.0
-10.0
+1.0
 true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot error-value"
+"default" 1.0 0 -16777216 true "" "plot error-value / 50"
 
 MONITOR
 11
-614
+585
 149
-659
+630
 Blue %
 100 * count brains with [color = blue]/((count brains with [color = blue]) + (count brains with [color = red]))
 17
@@ -974,14 +973,14 @@ CHOOSER
 55
 Graph-type
 Graph-type
-"fully-connected" "graph" "tree" "small-word"
-3
+"fully-connected" "random" "tree" "small-word"
+1
 
 BUTTON
-222
-16
-308
-49
+326
+20
+412
+53
 NIL
 elect-root
 NIL
@@ -1005,10 +1004,10 @@ Algo
 1
 
 SWITCH
-337
-15
-440
-48
+441
+19
+544
+52
 initialize
 initialize
 0
@@ -1016,21 +1015,21 @@ initialize
 -1000
 
 MONITOR
-1060
-15
-1193
-60
+954
+669
+1087
+714
 ERROR %
-error-value
+error-value / 50
 17
 1
 11
 
 MONITOR
-7
-817
-97
-862
+12
+798
+141
+843
 Red %
 100 * count brains with [color = red]/((count brains with [color = blue]) + (count brains with [color = red]))
 17
@@ -1055,15 +1054,25 @@ NIL
 1
 
 SWITCH
-479
-13
-603
-46
+583
+17
+707
+50
 record-stats
 record-stats
-1
+0
 1
 -1000
+
+TEXTBOX
+1064
+10
+1644
+157
+ GROUPE 1\n
+40
+0.0
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
