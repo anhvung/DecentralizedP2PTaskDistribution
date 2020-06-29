@@ -1,6 +1,6 @@
 breed [brains brain]
 brains-own [available mytask info-tasks contains-update-agent parent-brain-id refreshrate refreshlimit LbrainId Lstatus Ltaskslist Ltimestamp]
-globals [types type1 type2 numberoftask1 numberoftask2 starttingpoint visited info globalroot globalTasks]
+globals [types type1 type2 numberoftask1 numberoftask2 starttingpoint visited info globalroot globalTasks error-value convergence number-tests]
 
 
 
@@ -10,7 +10,7 @@ globals [types type1 type2 numberoftask1 numberoftask2 starttingpoint visited in
 
 to setup
 
-  (ifelse Graph-type = "fully connected" [
+  (ifelse Graph-type = "fully-connected" [
     generate-fully-connected
     ]
     Graph-type = "graph" [
@@ -19,7 +19,7 @@ to setup
     Graph-type = "tree" [
       generate-tree
     ]
-    Graph-type = "small word" [
+    Graph-type = "small-word" [
       generate-small-world
   ])
 
@@ -33,8 +33,9 @@ to setup
       setup-gossip
   ])
 
+  set  convergence 0
 
-
+  file-open "stats.txt"
   reset-ticks
 end
 
@@ -166,6 +167,35 @@ to go
     Algo = "Gossip" [
       GOSSIP
   ])
+  set error-value (abs( 50 - (100 * count brains with [color = blue]/((count brains with [color = blue]) + (count brains with [color = red])))))
+  if record-stats
+  [
+    stats
+  ]
+
+
+end
+
+to stats
+
+
+  ifelse error-value = 0 [
+    set  convergence convergence + 1
+    if convergence = 50 [
+
+      file-type Algo  file-type ";" file-type Graph-type  file-type ";" file-type number-brains  file-type ";" file-print ticks
+      type Algo type " " type Graph-type type " " type number-brains type " " print ticks
+      print number-tests
+      file-close
+      set number-tests number-tests + 1
+      if number-tests = 100 [
+        stop
+      ]
+      setup
+    ]
+  ][
+    set  convergence 0
+  ]
 end
 ;;;;;;;;;;;;;;;;;;;;;;;; END GO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -803,8 +833,8 @@ SLIDER
 number-brains
 number-brains
 0
-100
-70.0
+1000
+1000.0
 1
 1
 NIL
@@ -819,7 +849,7 @@ number-connections
 number-connections
 0
 1000
-172.0
+163.0
 1
 1
 NIL
@@ -850,8 +880,8 @@ SLIDER
 number-type1
 number-type1
 0
-100
-35.0
+1000
+500.0
 1
 1
 NIL
@@ -865,8 +895,8 @@ SLIDER
 number-type2
 number-type2
 0
-100
-35.0
+1000
+500.0
 1
 1
 NIL
@@ -924,7 +954,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot abs ( 50 - (100 * count brains with [color = blue]/((count brains with [color = blue]) + (count brains with [color = red]))))"
+"default" 1.0 0 -16777216 true "" "plot error-value"
 
 MONITOR
 11
@@ -944,7 +974,7 @@ CHOOSER
 55
 Graph-type
 Graph-type
-"fully connected" "graph" "tree" "small word"
+"fully-connected" "graph" "tree" "small-word"
 3
 
 BUTTON
@@ -972,7 +1002,7 @@ CHOOSER
 Algo
 Algo
 "Probabilistic" "Deterministic" "Gossip"
-2
+1
 
 SWITCH
 337
@@ -991,7 +1021,7 @@ MONITOR
 1193
 60
 ERROR %
-abs ( 50 - (100 * count brains with [color = blue]/((count brains with [color = blue]) + (count brains with [color = red]))))
+error-value
 17
 1
 11
@@ -1023,6 +1053,17 @@ NIL
 NIL
 NIL
 1
+
+SWITCH
+479
+13
+603
+46
+record-stats
+record-stats
+1
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
