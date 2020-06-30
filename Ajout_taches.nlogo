@@ -1,6 +1,6 @@
 breed [brains brain]
 brains-own [available mytask info-tasks contains-update-agent parent-brain-id refreshrate refreshlimit LbrainId Lstatus Ltaskslist Ltimestamp]
-globals [types type1 type2 numberoftask1 numberoftask2 starttingpoint visited info globalroot globalTasks number-of-types total-number-of-task task-list color-list]
+globals [types starttingpoint visited info globalroot globalTasks number-of-types total-number-of-task task-list color-list]
 
 
 
@@ -95,8 +95,13 @@ end
 
 to setup-gossip
   set globalTasks []
-  set globalTasks lput number-type1 globalTasks
-  set globalTasks lput number-type2 globalTasks
+  let i 0
+    while[i < number-of-types][
+      set globalTasks lput item i task-list globalTasks
+      set i i + 1
+    ]
+
+
   set types [red blue green]
 
   ask brains[
@@ -113,10 +118,6 @@ to setup-gossip
   ]
 
 
-  set type1 number-type1
-  set type2 number-type2
-
-
   ;Point d'entrée
   set starttingpoint one-of brains
 
@@ -124,27 +125,23 @@ to setup-gossip
   ;Point d'entrée
   ifelse initialize [
     ask brains [
-      set info-tasks insert-item 0 info-tasks type2
-      set info-tasks insert-item 0 info-tasks type1
-      let newdata 0
-
-      let savedinfo-tasks info-tasks
-      let choix random-float 1
-      ifelse choix < 0.5 [
-        set color blue
-
-        set LbrainId lput who LbrainId
-        set Lstatus lput 0 Lstatus
-        set Ltaskslist lput savedinfo-tasks Ltaskslist
-        set Ltimestamp lput -1 Ltimestamp
-      ][
-        set color red
-
-        set LbrainId lput who LbrainId
-        set Lstatus lput 1 Lstatus
-        set Ltaskslist lput savedinfo-tasks Ltaskslist
-        set Ltimestamp lput -1 Ltimestamp
+      let j 0
+      while[j < number-of-types][
+        set info-tasks insert-item 0 info-tasks (item j task-list)
+        set j j + 1
       ]
+
+      let newdata 0
+      let savedinfo-tasks info-tasks
+
+      let choix random length task-list
+      set color item choix color-list
+
+      set LbrainId lput who LbrainId
+      set Lstatus lput choix Lstatus
+      set Ltaskslist lput savedinfo-tasks Ltaskslist
+      set Ltimestamp lput -1 Ltimestamp
+
 
 
 
@@ -154,8 +151,11 @@ to setup-gossip
   [
     ask one-of brains  [
 
-      set info-tasks insert-item 0 info-tasks type2
-      set info-tasks insert-item 0 info-tasks type1
+      let k 0
+      while[k < number-of-types][
+        set info-tasks insert-item 0 info-tasks (item k task-list)
+        set k k + 1
+      ]
       let newdata 0
 
       let savedinfo-tasks info-tasks
@@ -273,8 +273,14 @@ to DETERMINISTIC
 end
 
 to DETERMINISTIC-update-target [myTarget receinved-info-tasks]
-  let myntask1 item 0 receinved-info-tasks
-  let myntask2 item 1 receinved-info-tasks
+  let myntask []
+  let k 0
+  while[k < number-of-types][
+    set myntask insert-item k (item k receinved-info-tasks) myntask
+
+    set k k + 1
+  ]
+
   ifelse myTarget != nobody[ ; au cas ou s'il n'y a pas de voisin
     ask myTarget[
       if available = 0 [ ; S'il n'est pas en train de traiter une task
@@ -302,8 +308,12 @@ to DETERMINISTIC-update-target [myTarget receinved-info-tasks]
         set available 1
       ]
       set info-tasks []
-      set info-tasks insert-item 0 info-tasks myntask2
-      set info-tasks insert-item 0 info-tasks myntask1
+      while[k < number-of-types][
+        set info-task insert-item 0 (item k receinved-info-tasks) myntask
+
+        set k k + 1
+      ]
+
     ]
   ]
   [print "no voisin !!!"]
@@ -818,7 +828,6 @@ to reset-task
 end
 
 
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 503
@@ -910,21 +919,6 @@ NIL
 NIL
 NIL
 1
-
-SLIDER
-786
-10
-1007
-43
-number-type2
-number-type2
-0
-100
-100.0
-1
-1
-NIL
-HORIZONTAL
 
 CHOOSER
 8
@@ -1039,21 +1033,6 @@ NIL
 NIL
 NIL
 1
-
-SLIDER
-544
-12
-763
-45
-number-type1
-number-type1
-0
-100
-90.0
-1
-1
-NIL
-HORIZONTAL
 
 BUTTON
 62
