@@ -1,6 +1,6 @@
 breed [brains brain]
 brains-own [available mytask estimation-tasks old-estimation-tasks]
-globals [number-task0 number-task1]
+globals [number-task0 number-task1 alpha]
 
 to generate-graph
   clear-all
@@ -41,6 +41,8 @@ to generate-graph
 
   layout-radial brains links brain 0
 
+  reset-ticks
+
 end
 
 to setup-agents
@@ -80,36 +82,14 @@ to setup-agents
     ]
   ]
 
+  set alpha 0.15
+
 end
 
 to go
-  set alpha alpha - 0.01
-
-  repeat int(number-brains / 2) [
-    observe
-  ]
-
-  ask brains [
-    adjust-task
-  ]
-
-  ask brains [
-    set estimation-tasks list 0 0
-    set estimation-tasks replace-item mytask estimation-tasks 1
-    set old-estimation-tasks estimation-tasks
-  ]
-
-  set number-task0 0
-  set number-task1 0
-
-  ask brains [
-    if mytask = 0 [
-      set number-task0 number-task0 + 1
-    ]
-
-    if mytask = 1 [
-      set number-task1 number-task1 + 1
-    ]
+  while [alpha > 0][
+    iterate
+    tick
   ]
 
 end
@@ -152,11 +132,7 @@ to observe
     ]
 
     set estimation-tasks lst
-  ]
-
-  ask brains [
     set old-estimation-tasks estimation-tasks
-    ;show estimation-tasks
   ]
 
 end
@@ -183,6 +159,38 @@ to adjust-task
   ]
 
 end
+
+to iterate
+  set alpha alpha - 0.01
+
+  repeat int(number-brains / 3) [
+    observe
+  ]
+
+  ask brains [
+    adjust-task
+  ]
+
+  ask brains [
+    set estimation-tasks list 0 0
+    set estimation-tasks replace-item mytask estimation-tasks 1
+    set old-estimation-tasks estimation-tasks
+  ]
+
+  set number-task0 0
+  set number-task1 0
+
+  ask brains [
+    if mytask = 0 [
+      set number-task0 number-task0 + 1
+    ]
+
+    if mytask = 1 [
+      set number-task1 number-task1 + 1
+    ]
+  ]
+
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 457
@@ -205,8 +213,8 @@ GRAPHICS-WINDOW
 16
 -16
 16
-0
-0
+1
+1
 1
 ticks
 30.0
@@ -220,7 +228,7 @@ number-brains
 number-brains
 2
 1000
-100.0
+307.0
 1
 1
 NIL
@@ -235,7 +243,7 @@ number-connections
 number-connections
 1
 3000
-1074.0
+1059.0
 1
 1
 NIL
@@ -265,7 +273,7 @@ BUTTON
 190
 NIL
 go
-T
+NIL
 1
 T
 OBSERVER
@@ -297,20 +305,9 @@ SWITCH
 144
 initiate-random
 initiate-random
-0
+1
 1
 -1000
-
-INPUTBOX
-126
-295
-287
-355
-alpha
--0.13000000000000012
-1
-0
-Number
 
 MONITOR
 50
@@ -333,6 +330,46 @@ number-task1
 17
 1
 11
+
+MONITOR
+53
+304
+268
+349
+NIL
+number-task0 / number-brains
+17
+1
+11
+
+MONITOR
+51
+377
+417
+422
+NIL
+abs (task-repartition - number-task0 / number-brains)
+17
+1
+11
+
+PLOT
+70
+492
+270
+642
+plot 1
+Tick
+Error
+0.0
+10.0
+0.0
+0.2
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot abs (task-repartition - number-task0 / number-brains)"
 
 @#$#@#$#@
 ## WHAT IS IT?
