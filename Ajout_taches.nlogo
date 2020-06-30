@@ -29,6 +29,48 @@ to setup-graph
 
 end
 
+to add-task
+
+  if number-of-types = 0 [
+    set task-list list (0)(0)
+    set color-list list (red)(blue)
+    set total-number-of-task 0
+  ]
+
+  if new-task-number != 0[
+
+    set number-of-types number-of-types + 1
+    set total-number-of-task (total-number-of-task + new-task-number)
+
+    if number-of-types = 1 [
+      set task-list replace-item 0 task-list new-task-number
+    ]
+    if number-of-types = 2 [
+      set task-list replace-item 1 task-list new-task-number
+    ]
+    if number-of-types > 2 [
+      set task-list insert-item (number-of-types - 1) task-list new-task-number
+      set color-list insert-item (number-of-types - 1) color-list one-of remove red remove blue base-colors
+    ]
+
+    print(task-list)
+    print(number-of-types)
+
+
+
+
+  ]
+
+end
+
+to reset-task
+  set task-list list (0)(0)
+  set total-number-of-task 0
+  set number-of-types 0
+  set color-list list (red)(blue)
+  print(task-list)
+end
+
 to setup-task
    ifelse number-of-types = 0 [ ;; si aucune tache n'a étée ajouté avant le setup on ne peut pas faire le setup
     print("You must add at least one task !")
@@ -793,47 +835,6 @@ end
 
 ;;;;;;;;;;;;;;;;;;; END OF ELECT ROOT ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-to add-task
-
-  if number-of-types = 0 [
-    set task-list list (0)(0)
-    set color-list list (red)(blue)
-    set total-number-of-task 0
-  ]
-
-  if new-task-number != 0[
-
-    set number-of-types number-of-types + 1
-    set total-number-of-task (total-number-of-task + new-task-number)
-
-    if number-of-types = 1 [
-      set task-list replace-item 0 task-list new-task-number
-    ]
-    if number-of-types = 2 [
-      set task-list replace-item 1 task-list new-task-number
-    ]
-    if number-of-types > 2 [
-      set task-list insert-item (number-of-types - 1) task-list new-task-number
-      set color-list insert-item (number-of-types - 1) color-list one-of remove red remove blue base-colors
-    ]
-
-    print(task-list)
-    print(number-of-types)
-
-
-
-
-  ]
-
-end
-
-to reset-task
-  set task-list list (0)(0)
-  set total-number-of-task 0
-  set number-of-types 0
-  set color-list list (red)(blue)
-  print(task-list)
-end
 @#$#@#$#@
 GRAPHICS-WINDOW
 503
