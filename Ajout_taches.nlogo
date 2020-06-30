@@ -9,7 +9,8 @@ globals [types starttingpoint info visited globalroot globalTasks number-of-type
 
 
 to setup-graph
-  let git 0
+  let get 0
+
 
   (ifelse Graph-type = "fully connected" [
     generate-fully-connected
@@ -236,13 +237,12 @@ to PROBABILISTIC-update-target [myTarget receinved-info-tasks]
       if available = 0 [ ; S'il n'est pas en train de traiter une task
 
         let k 0
-        let test True
-        while[k < number-of-types and test][
+        while[k < number-of-types][
 
           if (random-float 1)> item k myptask[
             set mytask k
             set color item k color-list
-            set test False
+
           ]
           set k k + 1
         ]
@@ -800,7 +800,7 @@ to elect-root ;; va trouver le neud le plus proche de tous les autres
 
 
   ask brain indiceMinimum[ ;; indiceMinimum est l'indice du noeud racine
-    set color black
+    set color yellow
 
   ]
 
@@ -849,7 +849,6 @@ to reset-task
   set color-list list (red)(blue)
   print(task-list)
 end
-
 
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -905,7 +904,7 @@ number-brains
 number-brains
 0
 100
-100.0
+67.0
 1
 1
 NIL
@@ -920,7 +919,7 @@ number-connections
 number-connections
 0
 1000
-442.0
+147.0
 1
 1
 NIL
@@ -951,7 +950,7 @@ CHOOSER
 Graph-type
 Graph-type
 "fully connected" "graph" "tree" "small word"
-1
+2
 
 BUTTON
 252
@@ -978,7 +977,7 @@ CHOOSER
 Algo
 Algo
 "Probabilistic" "Deterministic" "Gossip"
-0
+1
 
 SWITCH
 367
@@ -1034,7 +1033,7 @@ new-task-number
 new-task-number
 0
 100
-15.0
+16.0
 1
 1
 NIL
