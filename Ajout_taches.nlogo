@@ -1,6 +1,6 @@
 breed [brains brain]
 brains-own [available mytask info-tasks contains-update-agent parent-brain-id refreshrate refreshlimit LbrainId Lstatus Ltaskslist Ltimestamp]
-globals [types starttingpoint info visited globalroot globalTasks number-of-types total-number-of-task task-list color-list]
+globals [types starttingpoint visited globalroot globalTasks number-of-types total-number-of-task task-list color-list]
 
 
 
@@ -87,7 +87,7 @@ to setup-deterministic
     set mytask 0
   ]
 
-  set info []
+  let info []
   let i 0
     while[i < number-of-types][
       let ntask (item i task-list)
@@ -961,7 +961,7 @@ CHOOSER
 Algo
 Algo
 "Probabilistic" "Deterministic" "Gossip"
-0
+1
 
 SWITCH
 367
@@ -1017,7 +1017,7 @@ new-task-number
 new-task-number
 0
 100
-15.0
+16.0
 1
 1
 NIL
