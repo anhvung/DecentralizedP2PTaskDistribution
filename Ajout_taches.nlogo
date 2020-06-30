@@ -9,7 +9,6 @@ globals [types starttingpoint info visited globalroot globalTasks number-of-type
 
 
 to setup-graph
-  let get 0
 
 
   (ifelse Graph-type = "fully connected" [
@@ -289,58 +288,41 @@ to DETERMINISTIC
 end
 
 to DETERMINISTIC-update-target [myTarget receinved-info-tasks]
-   print("info-tasks")
-   print(receinved-info-tasks)
-  let myntask list (0)(0)
-  if length receinved-info-tasks > 0[
-    let q 0
-    while[q < length receinved-info-tasks][
-      set myntask insert-item 0 myntask (item q receinved-info-tasks)
+  print("info-tasks")
+  print(receinved-info-tasks)
 
-      set q q + 1
-  ]
-
-  let myntask1 1
-  let myntask2 1
-  ifelse myTarget != nobody[ ; au cas ou s'il n'y a pas de voisin
-    ask myTarget[
-      if available = 0 [ ; S'il n'est pas en train de traiter une task
-        if myntask1 > 0 and myntask2 = 0[
-          set mytask 1
-          set color blue
-          set myntask1 myntask1 - 1
-        ]
-        if myntask1 = 0 and myntask2 > 0[
-          set mytask 2
-          set color red
-          set myntask2 myntask2 - 1
-        ]
-        if myntask1 > 0 and myntask2 > 0[
-          ifelse random-float 1 > 0.5[
-            set mytask 1
-            set color blue
-            set myntask1 myntask1 - 1
-          ][
-            set mytask 2
-            set color red
-            set myntask2 myntask2 - 1
+    ifelse myTarget != nobody[ ; au cas ou s'il n'y a pas de voisin
+      ask myTarget[
+        let n length receinved-info-tasks
+        let i 0
+        let done false
+        if available = 0 [ ; S'il n'est pas en train de traiter une task
+          while [(done = false) and (i < n)] [
+            ifelse (item i receinved-info-tasks) > 0 [
+              set mytask i + 1
+              set color item i color-list
+              set available 1
+              set done true
+            ][
+              set i i + 1
+            ]
           ]
         ]
-        set available 1
+        set info-tasks []
+        let j 1
+        while [j <= n] [
+          let myntask item (n - j) receinved-info-tasks
+          ifelse (n - j = i) and (done = true) [
+            set info-tasks insert-item 0 info-tasks (myntask - 1)
+          ][
+            set info-tasks insert-item 0 info-tasks myntask
+          ]
+          set j j + 1
+        ]
       ]
-      set info-tasks []
-      let k 0
-      while[k < length myntask][
-        set info-tasks insert-item 0 info-tasks (item k myntask)
-
-
-        set k k + 1
-      ]
-
     ]
-  ]
-  [print "no voisin !!!"]
-  ]
+    [print "no voisin !!!"]
+
 
 end
 ;;;;;;;;;;;;;;;;;;;;;; END DETERMINISTIC ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -849,7 +831,6 @@ to reset-task
   set color-list list (red)(blue)
   print(task-list)
 end
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 503
@@ -950,7 +931,7 @@ CHOOSER
 Graph-type
 Graph-type
 "fully connected" "graph" "tree" "small word"
-2
+1
 
 BUTTON
 252
@@ -1033,7 +1014,7 @@ new-task-number
 new-task-number
 0
 100
-16.0
+15.0
 1
 1
 NIL
