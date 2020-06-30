@@ -9,11 +9,7 @@ globals [types starttingpoint info visited globalroot globalTasks number-of-type
 
 
 to setup-graph
-<<<<<<< HEAD
 
-
-=======
->>>>>>> 39e6a74616965edab577506f8b4199025b09c0a7
   (ifelse Graph-type = "fully connected" [
     generate-fully-connected
 
