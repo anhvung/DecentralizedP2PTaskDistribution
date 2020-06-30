@@ -9,8 +9,11 @@ globals [types starttingpoint info visited globalroot globalTasks number-of-type
 
 
 to setup-graph
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 39e6a74616965edab577506f8b4199025b09c0a7
   (ifelse Graph-type = "fully connected" [
     generate-fully-connected
 
@@ -235,16 +238,20 @@ to PROBABILISTIC-update-target [myTarget receinved-info-tasks]
 
       if available = 0 [ ; S'il n'est pas en train de traiter une task
 
-        let k 0
+      let choix random-float 1
+      let total 0
+      let k 0
         while[k < number-of-types][
-
-          if (random-float 1)> item k myptask[
-            set mytask k
+          set total total + item k info-tasks
+          if choix <= total and choix > total - item k info-tasks[
             set color item k color-list
+            set mytask k
 
           ]
+
           set k k + 1
         ]
+
 
         set available 1
       ]
@@ -885,7 +892,7 @@ number-brains
 number-brains
 0
 100
-67.0
+100.0
 1
 1
 NIL
@@ -958,7 +965,7 @@ CHOOSER
 Algo
 Algo
 "Probabilistic" "Deterministic" "Gossip"
-1
+0
 
 SWITCH
 367
