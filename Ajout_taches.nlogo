@@ -1,6 +1,6 @@
 breed [brains brain]
 brains-own [available mytask info-tasks contains-update-agent parent-brain-id refreshrate refreshlimit LbrainId Lstatus Ltaskslist Ltimestamp]
-globals [types starttingpoint visited info globalroot globalTasks number-of-types total-number-of-task task-list color-list]
+globals [types starttingpoint info visited globalroot globalTasks number-of-types total-number-of-task task-list color-list]
 
 
 
@@ -76,7 +76,18 @@ to setup-probabilistic
 end
 
 to setup-deterministic
-  ask brains[set color black]
+  ask brains[
+    set color black
+    set available 0
+    let j 0
+    set info-tasks []
+    while[j < number-of-types][
+      set info-tasks insert-item 0 info-tasks (item j task-list)
+      set j j + 1
+    ]
+    set mytask 0
+  ]
+
   set info []
   let i 0
     while[i < number-of-types][
@@ -84,7 +95,6 @@ to setup-deterministic
       set info insert-item 0 info ntask
       set i i + 1
     ]
-
   ask one-of brains [
     set color yellow
     set contains-update-agent 1
@@ -254,9 +264,10 @@ to DETERMINISTIC
     let target one-of out-link-neighbors with [mytask = 0]
     let n  who
     ifelse target != nobody [ ;Si il existe un voisin sans tâche, on propage l'information
-      print("info-tasks")
-      print(info-tasks)
+      print("target != nobody")
       DETERMINISTIC-update-target target info-tasks
+
+
       set contains-update-agent 0
       ask target [
         set contains-update-agent 1
@@ -264,7 +275,9 @@ to DETERMINISTIC
       ]
     ][ ;Sinon on fait remonter l'information à celui qui nous l'avait donné (selon un dfs) pour qu'il puisse la donner à un des ses voisins, ou la remonter plus haut
       set target brain parent-brain-id
+      print("target = nobody")
       DETERMINISTIC-update-target target info-tasks
+
       set contains-update-agent 0
       ask target [
         set contains-update-agent 1
@@ -275,7 +288,8 @@ to DETERMINISTIC
 end
 
 to DETERMINISTIC-update-target [myTarget receinved-info-tasks]
-
+   print("info-tasks")
+   print(receinved-info-tasks)
   let myntask list (0)(0)
   if length receinved-info-tasks > 0[
     let q 0
@@ -317,8 +331,7 @@ to DETERMINISTIC-update-target [myTarget receinved-info-tasks]
       let k 0
       while[k < length myntask][
         set info-tasks insert-item 0 info-tasks (item k myntask)
-          print("receinved-info-tasks")
-          print(receinved-info-tasks)
+
 
         set k k + 1
       ]
@@ -327,7 +340,6 @@ to DETERMINISTIC-update-target [myTarget receinved-info-tasks]
   ]
   [print "no voisin !!!"]
   ]
-
 
 end
 ;;;;;;;;;;;;;;;;;;;;;; END DETERMINISTIC ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -561,7 +573,7 @@ to GOSSIP-updateTask [myTarget]
     set Ltaskslist    replace-item myIdInList Ltaskslist   (newInfoList)
     set Ltimestamp    replace-item myIdInList Ltimestamp   (ticks)
 
-    set info-tasks newInfoList
+    ;;set info-tasks newInfoList
 
   ]
 
@@ -938,7 +950,7 @@ CHOOSER
 Graph-type
 Graph-type
 "fully connected" "graph" "tree" "small word"
-3
+2
 
 BUTTON
 252
@@ -1021,7 +1033,7 @@ new-task-number
 new-task-number
 0
 100
-14.0
+16.0
 1
 1
 NIL
@@ -1083,10 +1095,10 @@ number-of-types
 11
 
 PLOT
-1171
-53
-1371
-203
+1119
+50
+1810
+692
 plot 1
 NIL
 NIL
@@ -1098,7 +1110,20 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot count brains with [color = 95]"
+"default" 1.0 0 -2674135 true "" "plot count brains with [color = red]"
+"pen-1" 1.0 0 -13345367 true "" "plot count brains with [color = blue]"
+"pen-2" 1.0 0 -7500403 true "" "plot count brains with [color = grey]"
+"pen-3" 1.0 0 -955883 true "" "plot count brains with [color = orange]"
+"pen-4" 1.0 0 -6459832 true "" "plot count brains with [color = brown]"
+"pen-5" 1.0 0 -1184463 true "" "plot count brains with [color = yellow]"
+"pen-6" 1.0 0 -10899396 true "" "plot count brains with [color = green]"
+"pen-7" 1.0 0 -13840069 true "" "plot count brains with [color = lime]"
+"pen-8" 1.0 0 -14835848 true "" "plot count brains with [color = turquoise]"
+"pen-9" 1.0 0 -11221820 true "" "plot count brains with [color = cyan]"
+"pen-10" 1.0 0 -13791810 true "" "plot count brains with [color = sky]"
+"pen-11" 1.0 0 -8630108 true "" "plot count brains with [color = violet]"
+"pen-12" 1.0 0 -5825686 true "" "plot count brains with [color = magenta]"
+"pen-13" 1.0 0 -2064490 true "" "plot count brains with [color = pink]"
 
 @#$#@#$#@
 ## WHAT IS IT?
