@@ -213,7 +213,7 @@ to PROBABILISTIC-update-target [myTarget receinved-info-tasks]
       set myptask insert-item i myptask (item i receinved-info-tasks)
       set i i + 1
     ]
-  print(myptask)
+
 
   ifelse myTarget != nobody[ ; au cas ou s'il n'y a pas de voisin
     ask myTarget[
@@ -224,7 +224,7 @@ to PROBABILISTIC-update-target [myTarget receinved-info-tasks]
       ]
 
       if available = 0 [ ; S'il n'est pas en train de traiter une task
-        print("update done")
+
         let k 0
         while[k < number-of-types][
 
@@ -254,6 +254,8 @@ to DETERMINISTIC
     let target one-of out-link-neighbors with [mytask = 0]
     let n  who
     ifelse target != nobody [ ;Si il existe un voisin sans tâche, on propage l'information
+      print("info-tasks")
+      print(info-tasks)
       DETERMINISTIC-update-target target info-tasks
       set contains-update-agent 0
       ask target [
@@ -273,14 +275,18 @@ to DETERMINISTIC
 end
 
 to DETERMINISTIC-update-target [myTarget receinved-info-tasks]
-  let myntask []
-  let k 0
-  while[k < number-of-types][
-    set myntask insert-item k (item k receinved-info-tasks) myntask
 
-    set k k + 1
+  let myntask list (0)(0)
+  if length receinved-info-tasks > 0[
+    let q 0
+    while[q < length receinved-info-tasks][
+      set myntask insert-item 0 myntask (item q receinved-info-tasks)
+
+      set q q + 1
   ]
 
+  let myntask1 1
+  let myntask2 1
   ifelse myTarget != nobody[ ; au cas ou s'il n'y a pas de voisin
     ask myTarget[
       if available = 0 [ ; S'il n'est pas en train de traiter une task
@@ -308,8 +314,11 @@ to DETERMINISTIC-update-target [myTarget receinved-info-tasks]
         set available 1
       ]
       set info-tasks []
-      while[k < number-of-types][
-        set info-task insert-item 0 (item k receinved-info-tasks) myntask
+      let k 0
+      while[k < length myntask][
+        set info-tasks insert-item 0 info-tasks (item k myntask)
+          print("receinved-info-tasks")
+          print(receinved-info-tasks)
 
         set k k + 1
       ]
@@ -317,6 +326,7 @@ to DETERMINISTIC-update-target [myTarget receinved-info-tasks]
     ]
   ]
   [print "no voisin !!!"]
+  ]
 
 
 end
@@ -882,7 +892,7 @@ number-brains
 number-brains
 0
 100
-54.0
+67.0
 1
 1
 NIL
@@ -955,7 +965,7 @@ CHOOSER
 Algo
 Algo
 "Probabilistic" "Deterministic" "Gossip"
-0
+1
 
 SWITCH
 367
@@ -1011,7 +1021,7 @@ new-task-number
 new-task-number
 0
 100
-34.0
+14.0
 1
 1
 NIL
