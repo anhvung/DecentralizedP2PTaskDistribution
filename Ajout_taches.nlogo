@@ -31,9 +31,9 @@ end
 
 to add-task
 
-  if number-of-types = 0 [
-    set task-list list (0)(0)
-    set color-list list (red)(blue)
+  if number-of-types = 0 [ ;; initialisation au début du programme
+    set task-list list (0)(0) ;; à l'indice i se trouve le nombre de brains nécéssaires pour la tache i
+    set color-list list (red)(blue) ;; à l'indice i se trouve la couleur associée à la tache i
     set total-number-of-task 0
   ]
 
@@ -72,8 +72,8 @@ to reset-task
 end
 
 to setup-task
-   ifelse number-of-types = 0 [ ;; si aucune tache n'a étée ajouté avant le setup on ne peut pas faire le setup
-    print("You must add at least one task !")
+   ifelse number-of-types < 1 [ ;; si aucune tache n'a étée ajouté avant le setup on ne peut pas faire le setup
+    print("You must add at least two tasks !")
   ]
   [
   (ifelse Algo = "Probabilistic" [
