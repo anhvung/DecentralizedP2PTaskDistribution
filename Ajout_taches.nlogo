@@ -8,17 +8,12 @@ globals [types type1 type2 numberoftask1 numberoftask2 starttingpoint visited in
 ;;;;;;;;;;;;;;;;;;;; SETUP ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-to setup
-
-  if number-of-types = 0 [ ;; si aucune tache n'a étée ajouté avant le setup on ne peut pas faire le setup
-    print("You must add at least one task !")
-  ]
+to setup-graph
 
 
-
-  if number-of-types != 0[
   (ifelse Graph-type = "fully connected" [
     generate-fully-connected
+
     ]
     Graph-type = "graph" [
       generate-graph
@@ -28,8 +23,18 @@ to setup
     ]
     Graph-type = "small word" [
       generate-small-world
+
   ])
 
+
+
+end
+
+to setup-task
+   ifelse number-of-types = 0 [ ;; si aucune tache n'a étée ajouté avant le setup on ne peut pas faire le setup
+    print("You must add at least one task !")
+  ]
+  [
   (ifelse Algo = "Probabilistic" [
     setup-probabilistic
     ]
@@ -39,13 +44,15 @@ to setup
     Algo = "Gossip" [
       setup-gossip
   ])
+  ]
 
   reset-ticks
-  ]
 end
 
 
+
 to setup-probabilistic
+
   ask brains[
     set available 0
     set mytask 0
@@ -55,7 +62,6 @@ to setup-probabilistic
 
   ]
 
-
   ask  one-of brains [
     let i 0
     while[i < number-of-types][
@@ -63,6 +69,7 @@ to setup-probabilistic
       set info-tasks insert-item 0 info-tasks ptask
       set i i + 1
     ]
+
     PROBABILISTIC-update-target self info-tasks
   ]
 
@@ -174,6 +181,8 @@ to go
     Algo = "Gossip" [
       GOSSIP
   ])
+
+
 end
 ;;;;;;;;;;;;;;;;;;;;;;;; END GO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -201,15 +210,16 @@ to PROBABILISTIC-update-target [myTarget receinved-info-tasks]
   let myptask []
   let i 0
     while[i < number-of-types][
-      set myptask replace-item i myptask (item i receinved-info-tasks)
+      set myptask insert-item i myptask (item i receinved-info-tasks)
       set i i + 1
     ]
+  print(myptask)
 
   ifelse myTarget != nobody[ ; au cas ou s'il n'y a pas de voisin
     ask myTarget[
       let j 0
       while[j < number-of-types][
-        set info-tasks insert-item 0 myptask (item j myptask)
+        set info-tasks insert-item 0 info-tasks (item j myptask)
         set j j + 1
       ]
 
@@ -790,15 +800,13 @@ to add-task
     ]
 
     print(task-list)
-
-
-
-
+    print(number-of-types)
 
 
 
 
   ]
+
 end
 
 to reset-task
@@ -811,13 +819,12 @@ end
 
 
 
-
 @#$#@#$#@
 GRAPHICS-WINDOW
-226
-58
-807
-640
+503
+79
+1084
+661
 -1
 -1
 17.364
@@ -841,12 +848,12 @@ ticks
 30.0
 
 BUTTON
-17
-121
-80
-154
-NIL
-setup\n
+66
+217
+153
+258
+setup-graph
+setup-graph\n
 NIL
 1
 T
@@ -859,39 +866,39 @@ NIL
 
 SLIDER
 8
-277
+120
 220
-310
+153
 number-brains
 number-brains
 0
 100
-97.0
+54.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-4
-322
-221
-355
+7
+162
+219
+195
 number-connections
 number-connections
 0
 1000
-172.0
+147.0
 1
 1
 NIL
 HORIZONTAL
 
 BUTTON
-122
-121
-185
-154
+137
+596
+200
+629
 NIL
 go
 T
@@ -905,25 +912,10 @@ NIL
 1
 
 SLIDER
-2
-369
-221
-402
-number-type1
-number-type1
-0
-100
-99.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-4
-408
-225
-441
+786
+10
+1007
+43
 number-type2
 number-type2
 0
@@ -934,75 +926,10 @@ number-type2
 NIL
 HORIZONTAL
 
-PLOT
-7
-457
-207
-607
-Task 1
-Tick
-Task1
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "plot count brains with [color = blue]" "plot count brains with [color = red]"
-
-PLOT
-5
-665
-205
-815
-Task 2
-Tick
-Task 2
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "plot count brains with [color = blue]" "plot count brains with [color = red]"
-
-PLOT
-860
-73
-1599
-701
-Distribution
-Time
-Ratio
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot abs ( 50 - (100 * count brains with [color = blue]/((count brains with [color = blue]) + (count brains with [color = red]))))"
-
-MONITOR
-11
-614
-149
-659
-Blue %
-100 * count brains with [color = blue]/((count brains with [color = blue]) + (count brains with [color = red]))
-17
-1
-11
-
 CHOOSER
-28
+8
 10
-166
+220
 55
 Graph-type
 Graph-type
@@ -1010,10 +937,10 @@ Graph-type
 3
 
 BUTTON
-222
-16
-308
-49
+252
+12
+338
+51
 NIL
 elect-root
 NIL
@@ -1027,9 +954,9 @@ NIL
 1
 
 CHOOSER
-28
+7
 64
-166
+221
 109
 Algo
 Algo
@@ -1037,43 +964,21 @@ Algo
 0
 
 SWITCH
-337
-15
-440
-48
+367
+11
+470
+44
 initialize
 initialize
-0
+1
 1
 -1000
 
-MONITOR
-1060
-15
-1193
-60
-ERROR %
-abs ( 50 - (100 * count brains with [color = blue]/((count brains with [color = blue]) + (count brains with [color = red]))))
-17
-1
-11
-
-MONITOR
-7
-817
-97
-862
-Red %
-100 * count brains with [color = red]/((count brains with [color = blue]) + (count brains with [color = red]))
-17
-1
-11
-
 BUTTON
-54
-169
-147
-202
+22
+595
+115
+628
 go (1 step)
 go
 NIL
@@ -1087,10 +992,10 @@ NIL
 1
 
 BUTTON
-575
-693
-664
-726
+14
+413
+103
+446
 Add-task
 add-task
 NIL
@@ -1104,26 +1009,26 @@ NIL
 1
 
 SLIDER
-282
-686
-454
-719
+9
+364
+221
+397
 new-task-number
 new-task-number
 0
 100
-17.0
+34.0
 1
 1
 NIL
 HORIZONTAL
 
 BUTTON
-715
-694
-810
-727
-reset-task
+118
+413
+220
+446
+reset-tasks
 reset-task
 NIL
 1
@@ -1134,6 +1039,77 @@ NIL
 NIL
 NIL
 1
+
+SLIDER
+544
+12
+763
+45
+number-type1
+number-type1
+0
+100
+90.0
+1
+1
+NIL
+HORIZONTAL
+
+BUTTON
+62
+536
+167
+569
+setup-tasks
+setup-task
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+TEXTBOX
+256
+95
+479
+706
+Les instruction d'un meme numéro peuvent être exécutées dans n'importe quel ordre.\n\nLes instructions de deux numéros différents doivent être exécutée dans l'ordre croissant de numéros.\n\n1. Graph-type/ Algo/number-brains/ number-connections\n\n2. setup-graph\n\n3. New-task-number/add-task/reset-task\n\n4.setup-tasks\n\n5. go / go(1step)
+16
+0.0
+1
+
+MONITOR
+15
+467
+212
+512
+types-of-tasks
+number-of-types
+17
+1
+11
+
+PLOT
+1171
+53
+1371
+203
+plot 1
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot count brains with [color = 95]"
 
 @#$#@#$#@
 ## WHAT IS IT?
