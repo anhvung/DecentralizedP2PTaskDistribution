@@ -35,7 +35,6 @@ to setup-graph
   reset-ticks
 
 end
-
 to add-task
 
   if number-of-types = 0 [ ;; initialisation au début du programme
@@ -56,12 +55,18 @@ to add-task
       set task-list replace-item 1 task-list new-task-number
     ]
     if number-of-types > 2 [
+      ifelse
+      Algo = "Estimation-adjustment" [
+        print("With Estimation-adjustment only 2 types of task can be added")
+        user-message ("With Estimation-adjustment only 2 types of task can be added")
+
+    ][
+
       set task-list insert-item (number-of-types - 1) task-list new-task-number
+      ]
 
     ]
 
-    ;;print(task-list)
-    ;;print(number-of-types)
 
   ]
 
@@ -140,7 +145,7 @@ to setup-probabilistic
 end
 
 to setup-estimation-adjustment
-  set task-repartition (item 0 task-list) / number-brains
+  set task-repartition (item 0 task-list) / number-agents
 
   ask brains[
     set available 0
@@ -351,8 +356,8 @@ to stats
     set  convergence convergence + 1
     if convergence = 50 and  number-tests < 100 [
 
-      file-type Algo  file-type ";" file-type Graph-type  file-type ";" file-type number-brains  file-type ";" file-print (ticks - 50)
-      type "Saved " type number-tests type " " type Algo type " " type Graph-type type " " type number-brains type " " print (ticks - 50)
+      file-type Algo  file-type ";" file-type Graph-type  file-type ";" file-type number-agents  file-type ";" file-print (ticks - 50)
+      type "Saved " type number-tests type " " type Algo type " " type Graph-type type " " type number-agents type " " print (ticks - 50)
 
       file-close
       set number-tests number-tests + 1
@@ -433,10 +438,13 @@ end
 ;;;;;;;;;;;;;;;;;; ESTIMATION-ADJUSTMENT ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to ESTIMATION-ADJUSTMENT
-  while [alpha > 0][
-    iterate
-    tick
-  ]
+  ifelse number-of-types > 2 [ user-message ("With Estimation-adjustment only 2 types of task can be added")]
+
+  [
+    while [alpha > 0][
+      iterate
+      tick
+  ]]
 end
 
 to observe
@@ -501,7 +509,7 @@ end
 to iterate
   set alpha alpha - 0.01
 
-  repeat int(number-brains / 3) [
+  repeat int(number-agents / 3) [
     observe
   ]
 
@@ -847,7 +855,7 @@ to generate-tree
   ]
 
   let i 1
-  while [i < number-brains][
+  while [i < number-agents][
     create-brains 1 [
       set shape "circle"
       setxy random 30 - 15 random 30 - 15
@@ -878,7 +886,7 @@ to generate-graph
   ]
 
   let i 1
-  while [i < number-brains][
+  while [i < number-agents][
     create-brains 1 [
       set shape "circle"
       setxy random 30 - 15 random 30 - 15
@@ -913,7 +921,7 @@ to generate-fully-connected
     set pcolor white
   ]
 
-  create-brains number-brains [
+  create-brains number-agents [
     set shape "circle"
     setxy random 30 - 15 random 30 - 15
   ]
@@ -936,17 +944,17 @@ to generate-small-world
     set pcolor white
   ]
 
-  create-brains number-brains [
+  create-brains number-agents [
     set shape "circle"
   ]
 
   layout-circle (sort brains) max-pxcor - 1
 
   let i 0
-  while [i < number-brains][
+  while [i < number-agents][
     ask brain i [
-      create-link-with brain ((i + 1) mod number-brains)
-      create-link-with brain ((i + 2) mod number-brains)
+      create-link-with brain ((i + 1) mod number-agents)
+      create-link-with brain ((i + 2) mod number-agents)
     ]
     set i i + 1
   ]
@@ -954,7 +962,7 @@ to generate-small-world
   ask links [
     if (random-float 1) < 0.4 [
       let node1 end1
-      if [count link-neighbors] of end1 < (number-brains - 1) [
+      if [count link-neighbors] of end1 < (number-agents - 1) [
         let node2 one-of brains with [(self != node1) and (not link-neighbor? node1)]
         ask node1 [
           create-link-with node2
@@ -975,20 +983,20 @@ end
 
 to-report elect-root;; va trouver le neud le plus proche de tous les autres et renvoyer son indice
 
-  let minimum number-brains * number-brains
+  let minimum number-agents * number-agents
   let indiceMinimum 0
   let i 0
 
-  while [i < number-brains][ ;; pour chaque noeud, on va calculer la somme des distances qui le sépare des autres noeuds
+  while [i < number-agents][ ;; pour chaque noeud, on va calculer la somme des distances qui le sépare des autres noeuds
 
     let liste list (0)(0) ;; cette liste va contenir à l'indice j la distance entre le noeud d'indice j et le noeud etudié i
     let j 0
     let level 1 ;; level est la distance à laquelle on se situe du noeud i étudié
 
 
-    ask brain i[ ;; premiere étape : on crée la liste de taille number-brains en mettant des 1 pour les voisins du noeud étudié et des (number-brains - 1) ailleurs
-      while [j < number-brains][
-        set liste insert-item j liste (number-brains - 1) ;; on inititalise les distances à la distance maximale possible
+    ask brain i[ ;; premiere étape : on crée la liste de taille number-agents en mettant des 1 pour les voisins du noeud étudié et des (number-agents - 1) ailleurs
+      while [j < number-agents][
+        set liste insert-item j liste (number-agents - 1) ;; on inititalise les distances à la distance maximale possible
 
         if link-neighbor? brain j[
           set liste replace-item j liste level
@@ -999,14 +1007,14 @@ to-report elect-root;; va trouver le neud le plus proche de tous les autres et r
     set liste replace-item i liste 0 ;; on met une distance de 0 pour le noeud étudié
     set level level + 1
     let q 0
-    while [level < number-brains][ ;; dans le pire des cas, si tous les noeuds sont allignés on a au maximum number-brains - 1 levels
+    while [level < number-agents][ ;; dans le pire des cas, si tous les noeuds sont allignés on a au maximum number-agents - 1 levels
                                    ;; on va donc regarder quels sont les voisins des voisins, tout en enregistrant la distance au noeud étudié dans la liste
       let k 0
-      while [k < number-brains][
+      while [k < number-agents][
         if item k liste = level - 1[ ;; si le noeud k est du niveau (level - 1) alors on va chercher ses voisins encore non connéctés pour les mettres au niveau level
           ask brain k[
             let n 0
-            while [n < number-brains][
+            while [n < number-agents][
 
               if (link-neighbor? brain n) and (item n liste > level)[ ;; si le noeud n est voisin du noeud k et qu'il n'a pas encore été connecté au réseau alors on le connecte en indiquant qu'il est à une distance de level du noeud étudié
                 set liste replace-item n liste level
@@ -1029,7 +1037,7 @@ to-report elect-root;; va trouver le neud le plus proche de tous les autres et r
     let power 0
     let p 0
 
-    while[p < number-brains][
+    while[p < number-agents][
       set power power + item p liste
       set p p + 1
     ]
@@ -1081,8 +1089,8 @@ SLIDER
 60
 220
 93
-number-brains
-number-brains
+number-agents
+number-agents
 0
 1000
 100.0
@@ -1131,7 +1139,7 @@ CHOOSER
 Graph-type
 Graph-type
 "fully connected" "random" "tree" "small word"
-3
+2
 
 CHOOSER
 6
@@ -1141,7 +1149,7 @@ CHOOSER
 Algo
 Algo
 "Probabilistic" "Deterministic" "Gossip" "Estimation-adjustment"
-3
+1
 
 SWITCH
 929
@@ -1312,10 +1320,10 @@ record-stats
 -1000
 
 MONITOR
-1244
-549
-1464
-594
+1175
+602
+1395
+647
 ERROR (pourcentage)
 error-value * 100
 17
@@ -1323,10 +1331,10 @@ error-value * 100
 11
 
 PLOT
-1243
-370
-1465
-537
+1174
+423
+1396
+590
 ERROR (pourcentage)
 NIL
 NIL
@@ -1529,11 +1537,21 @@ Pour les algorithmes probabilistic, deterministic et gossip (si initialize-all-g
 1
 
 TEXTBOX
-1250
-602
-1417
-653
+1181
+655
+1348
+706
 Erreur :\nMoyenne des erreurs relatives par type de tâche en pourcentage
+11
+0.0
+1
+
+TEXTBOX
+1598
+536
+1748
+554
+PAF
 11
 0.0
 1
