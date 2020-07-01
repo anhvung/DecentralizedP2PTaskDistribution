@@ -481,15 +481,15 @@ to process-both [myTarget me];update both sender and receiver data and update th
 
   GOSSIP-prepareData me   ; preparation des donnees a echanger
 
-  GOSSIP-updateData myTarget me
+  GOSSIP-updateData myTarget me ;envoi et mise a jour des donnees
 
-  GOSSIP-updateTask myTarget
+  GOSSIP-updateTask myTarget   ;mise a jour si necessaire des taches (couleurs)
 
 
 
 end
 
-to GOSSIP-prepareData [mybrain]
+to GOSSIP-prepareData [mybrain] ;Si le noeuds n a pas sa propre info, le rajouter a la liste
   ask mybrain[
     let myWho who
     let k 0
@@ -515,18 +515,18 @@ to GOSSIP-prepareData [mybrain]
 
 end
 to GOSSIP-updateData [myTarget myBrain]
-  let RLbrainId []
+  let RLbrainId []      ; listes des donnees envoyees par myBrain et recues par mytarget
   let RLstatus []
   let RLtaskslist []
   let RLtimestamp []
 
   ask myBrain [
-    set RLbrainId LbrainId
+    set RLbrainId LbrainId       ; listes des donnees envoyees par myBrain et recues par mytarget
     set RLstatus Lstatus
     set RLtaskslist Ltaskslist
     set RLtimestamp Ltimestamp
   ]
-  if myTarget != nobody [
+  if myTarget != nobody [       ; pour chaque info, si elle n exsiste pas on la rajoute et si elle existe deja on garde la plus recente et on met a jour sa date (timestamp)
     ask myTarget[
       let i 0
       while [i != length RLbrainId][
@@ -569,10 +569,10 @@ to GOSSIP-updateData [myTarget myBrain]
 
 end
 to GOSSIP-updateTask [myTarget]
-
+i
   ask myTarget [
 
-    let newInfoList []
+    let newInfoList []    ; update des taches
     let maxTime 0
     let myIdInList 0
     let myStatus 0
@@ -603,29 +603,21 @@ to GOSSIP-updateTask [myTarget]
     set myStatus item myIdInList Lstatus
     set myTimeStamp item myIdInList Ltimestamp
 
-    let taskstates map [ netlogoctropnul -> 0 ] globalTasks ;newInfoList
+    let taskstates map [ netlogoctropnul -> 0 ] globalTasks  ; liste des distributions de taches a partir des donnees du noeud
     foreach Lstatus [
       x ->
 
       if x >= 0 [
-        set taskstates replace-item x taskstates (( item x taskstates ) + 1)
+        set taskstates replace-item x taskstates (( item x taskstates ) + 1)  ; initialisation de la liste des distributions de taches a partir des donnees du noeud
       ]
 
     ]
 
-    ; set taskstates ( map [ [ currentvalue maxvalue ] -> maxvalue - currentvalue ] taskstates newInfoList)
-    ;print taskstates
-
-    let pourcentage 0
-    ifelse 0 = (item 1 taskstates) +  (item 0 taskstates) [
-      set refreshlimit 0
-    ][
-      set pourcentage min list (item 0 taskstates /( (item 1 taskstates) +  (item 0 taskstates)))  (item 1 taskstates /( (item 1 taskstates) +  (item 0 taskstates)))
-      ;set refreshlimit (75 * pourcentage * pourcentage ) - (17.5 * pourcentage)
-      ; set refreshlimit ((exp (10 * pourcentage)) - 1)
 
 
-    ]
+
+      set refreshlimit 0 ; non pertinent sert a limiter le taux de rafraichissement si besoin ( a supprimer si on veut le limiter )
+
 
 
 
@@ -637,11 +629,11 @@ to GOSSIP-updateTask [myTarget]
 
 
    ; if refreshrate > 0 and ( random ((length Lstatus)* (log (length Lstatus) 2)) < 1 )[
-    if refreshrate > 0 and ( random ((length Lstatus)) < 1 )[
+    if refreshrate > 0 and ( random ((length Lstatus)) < 1 )[  ; on a une chance inverse a la longeur du reseau connu de changer d etat
 
 
       set refreshrate 0
-      ;set refreshlimit one-of [8 9 10] * (pourcentage * 10 )
+
 
       let j 0
       let newTask -1
@@ -650,7 +642,7 @@ to GOSSIP-updateTask [myTarget]
 
 
         if item j taskstates > tmpValue [
-          set tmpValue item j taskstates
+          set tmpValue item j taskstates    ; on prend la tache la moins distribuee
           set newTask j
         ]
 
@@ -659,7 +651,7 @@ to GOSSIP-updateTask [myTarget]
       if  newTask != -1 and  newTask != mytask [
 
 
-        set color item newTask color-list
+        set color item newTask color-list  ; on change de couleur et donc de tache
         set myStatus newTask
 
 
@@ -679,9 +671,9 @@ to GOSSIP-updateTask [myTarget]
 
 
 
-    set Lstatus   replace-item myIdInList Lstatus  (myStatus)
-    set Ltaskslist    replace-item myIdInList Ltaskslist   (newInfoList)
-    set Ltimestamp    replace-item myIdInList Ltimestamp   (ticks)
+    set Lstatus   replace-item myIdInList Lstatus  (myStatus)     ;update des donnees
+    set Ltaskslist    replace-item myIdInList Ltaskslist   (newInfoList) ;update des donnees
+    set Ltimestamp    replace-item myIdInList Ltimestamp   (ticks) ;update des donnees
 
     ;;set info-tasks newInfoList
 
@@ -950,7 +942,7 @@ number-brains
 number-brains
 0
 10000
-25.0
+50.0
 1
 1
 NIL
@@ -996,7 +988,7 @@ CHOOSER
 Graph-type
 Graph-type
 "fully connected" "graph" "tree" "small word"
-2
+3
 
 CHOOSER
 7
@@ -1006,7 +998,7 @@ CHOOSER
 Algo
 Algo
 "Probabilistic" "Deterministic" "Gossip"
-1
+2
 
 SWITCH
 394
@@ -1062,7 +1054,7 @@ new-task-number
 new-task-number
 0
 1000
-5.0
+25.0
 1
 1
 NIL
@@ -1172,7 +1164,7 @@ SWITCH
 84
 record-stats
 record-stats
-0
+1
 1
 -1000
 

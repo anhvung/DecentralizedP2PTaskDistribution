@@ -84,19 +84,19 @@ to setup-task-and-graph
 
   setup-graph
 
-   ifelse number-of-types < 1 [ ;; si aucune tache n'a étée ajouté avant le setup on ne peut pas faire le setup
+  ifelse number-of-types < 1 [ ;; si aucune tache n'a étée ajouté avant le setup on ne peut pas faire le setup
     print("You must add at least two tasks !")
   ]
   [
-  (ifelse Algo = "Probabilistic" [
-    setup-probabilistic
-    ]
-    Algo = "Deterministic" [
-      setup-deterministic
-    ]
-    Algo = "Gossip" [
-      setup-gossip
-  ])
+    (ifelse Algo = "Probabilistic" [
+      setup-probabilistic
+      ]
+      Algo = "Deterministic" [
+        setup-deterministic
+      ]
+      Algo = "Gossip" [
+        setup-gossip
+    ])
   ]
 
   reset-ticks
@@ -118,26 +118,26 @@ to setup-probabilistic
     let k elect-root
     ask brain k[
       let i 0
-    while[i < number-of-types][
-      let ptask (item i task-list / total-number-of-task)
-      set info-tasks insert-item 0 info-tasks ptask
-      set i i + 1
-    ]
+      while[i < number-of-types][
+        let ptask (item i task-list / total-number-of-task)
+        set info-tasks insert-item 0 info-tasks ptask
+        set i i + 1
+      ]
 
-    PROBABILISTIC-update-target self info-tasks
+      PROBABILISTIC-update-target self info-tasks
     ]
 
   ][ ;; sinon on prend un point d'entrée au hasard
-  ask  one-of brains [
-    let i 0
-    while[i < number-of-types][
-      let ptask (item i task-list / total-number-of-task)
-      set info-tasks insert-item 0 info-tasks ptask
-      set i i + 1
-    ]
+    ask  one-of brains [
+      let i 0
+      while[i < number-of-types][
+        let ptask (item i task-list / total-number-of-task)
+        set info-tasks insert-item 0 info-tasks ptask
+        set i i + 1
+      ]
 
-    PROBABILISTIC-update-target self info-tasks
-  ]
+      PROBABILISTIC-update-target self info-tasks
+    ]
   ]
 
 end
@@ -157,24 +157,24 @@ to setup-deterministic
 
   let info []
   let i 0
-    while[i < number-of-types][
-      let ntask (item i task-list)
-      set info insert-item 0 info ntask
-      set i i + 1
-    ]
+  while[i < number-of-types][
+    let ntask (item i task-list)
+    set info insert-item 0 info ntask
+    set i i + 1
+  ]
   ifelse leader-election [;;si le leader-election est sur off alors on innitialise le point d'entrée à l'aide de la fonction elect-root
     let k elect-root
     ask  brain k[
-    set color yellow
-    set contains-update-agent 1
-    DETERMINISTIC-update-target self info
-  ]
+      set color yellow
+      set contains-update-agent 1
+      DETERMINISTIC-update-target self info
+    ]
   ][ ;; sinon on prend un point d'entrée au hasard
     ask one-of brains [
-    set color yellow
-    set contains-update-agent 1
-    DETERMINISTIC-update-target self info
-  ]
+      set color yellow
+      set contains-update-agent 1
+      DETERMINISTIC-update-target self info
+    ]
 
   ]
 
@@ -183,10 +183,10 @@ end
 to setup-gossip
   set globalTasks []
   let i 0
-    while[i < number-of-types][
-      set globalTasks lput item i task-list globalTasks ; Initialisation des taches
-      set i i + 1
-    ]
+  while[i < number-of-types][
+    set globalTasks lput item i task-list globalTasks ; Initialisation des taches
+    set i i + 1
+  ]
 
 
 
@@ -240,37 +240,37 @@ to setup-gossip
     ifelse leader-election[ ;; Si initialize-gossip OFF ET si le leader-election est sur on  alors on innitialise le point d'entrée à l'aide de la fonction elect-root
       let q elect-root
       ask brain q[
-      let k 0
-      while[k < number-of-types][
-        set info-tasks insert-item 0 info-tasks (item k task-list)
-        set k k + 1
-      ]
-      let newdata 0
+        let k 0
+        while[k < number-of-types][
+          set info-tasks insert-item 0 info-tasks (item k task-list)
+          set k k + 1
+        ]
+        let newdata 0
 
-      let savedinfo-tasks info-tasks
-      set LbrainId lput who LbrainId
-      set Lstatus lput -1 Lstatus
-      set Ltaskslist lput savedinfo-tasks Ltaskslist
-      set Ltimestamp lput -1 Ltimestamp
+        let savedinfo-tasks info-tasks
+        set LbrainId lput who LbrainId
+        set Lstatus lput -1 Lstatus
+        set Ltaskslist lput savedinfo-tasks Ltaskslist
+        set Ltimestamp lput -1 Ltimestamp
       ]
 
     ][ ;; sinon on prend un point d'entrée au hasard
-    ask one-of brains  [
+      ask one-of brains  [
 
-      let k 0
-      while[k < number-of-types][
-        set info-tasks insert-item 0 info-tasks (item k task-list)
-        set k k + 1
+        let k 0
+        while[k < number-of-types][
+          set info-tasks insert-item 0 info-tasks (item k task-list)
+          set k k + 1
+        ]
+        let newdata 0
+
+        let savedinfo-tasks info-tasks
+        set LbrainId lput who LbrainId
+        set Lstatus lput -1 Lstatus
+        set Ltaskslist lput savedinfo-tasks Ltaskslist
+        set Ltimestamp lput -1 Ltimestamp
+
       ]
-      let newdata 0
-
-      let savedinfo-tasks info-tasks
-      set LbrainId lput who LbrainId
-      set Lstatus lput -1 Lstatus
-      set Ltaskslist lput savedinfo-tasks Ltaskslist
-      set Ltimestamp lput -1 Ltimestamp
-
-    ]
     ]
   ]
 end
@@ -348,10 +348,10 @@ to PROBABILISTIC-update-target [myTarget receinved-info-tasks]
 
   let myptask []
   let i 0
-    while[i < number-of-types][
-      set myptask insert-item i myptask (item i receinved-info-tasks)
-      set i i + 1
-    ]
+  while[i < number-of-types][
+    set myptask insert-item i myptask (item i receinved-info-tasks)
+    set i i + 1
+  ]
 
 
   ifelse myTarget != nobody[ ; au cas ou s'il n'y a pas de voisin
@@ -364,9 +364,9 @@ to PROBABILISTIC-update-target [myTarget receinved-info-tasks]
 
       if available = 0 [ ; S'il n'est pas en train de traiter une task
 
-      let choix random-float 1
-      let total 0
-      let k 0
+        let choix random-float 1
+        let total 0
+        let k 0
         while[k < number-of-types][
           set total total + item k info-tasks
           if choix <= total and choix > total - item k info-tasks[    ; on donne la couleur au noeud au hasrd
@@ -397,7 +397,7 @@ to DETERMINISTIC
     let target one-of out-link-neighbors with [mytask = 0] ;on essaie de trouver un voisin qui n'a pas encore de tâche
     let n  who
     ifelse target != nobody [ ;Si il existe un voisin sans tâche, on propage l'information
-      ;print("target != nobody")
+                              ;print("target != nobody")
       DETERMINISTIC-update-target target info-tasks
 
 
@@ -408,7 +408,7 @@ to DETERMINISTIC
       ]
     ][ ;Sinon on fait remonter l'information à celui qui nous l'avait donné (selon un dfs) pour qu'il puisse la donner à un des ses voisins, ou la remonter plus haut
       set target brain parent-brain-id ;c'est ici qu'intervient l'identifiant de celui qui a donné l'information, il savoir vers où la faire remonter
-      ;print("target = nobody")
+                                       ;print("target = nobody")
       DETERMINISTIC-update-target target info-tasks ;bien que le parent soit déjà attribué à une tâche, on lui donne l'information pout qu'il puisse la retransmettre ailleurs
 
       set contains-update-agent 0
@@ -489,7 +489,7 @@ to process-both [myTarget me];update both sender and receiver data and update th
 
 end
 
-to GOSSIP-prepareData [mybrain] ;Si prb
+to GOSSIP-prepareData [mybrain] ;Si le noeuds n a pas sa propre info, le rajouter a la liste
   ask mybrain[
     let myWho who
     let k 0
@@ -515,18 +515,18 @@ to GOSSIP-prepareData [mybrain] ;Si prb
 
 end
 to GOSSIP-updateData [myTarget myBrain]
-  let RLbrainId []
+  let RLbrainId []      ; listes des donnees envoyees par myBrain et recues par mytarget
   let RLstatus []
   let RLtaskslist []
   let RLtimestamp []
 
   ask myBrain [
-    set RLbrainId LbrainId
+    set RLbrainId LbrainId       ; listes des donnees envoyees par myBrain et recues par mytarget
     set RLstatus Lstatus
     set RLtaskslist Ltaskslist
     set RLtimestamp Ltimestamp
   ]
-  if myTarget != nobody [
+  if myTarget != nobody [       ; pour chaque info, si elle n exsiste pas on la rajoute et si elle existe deja on garde la plus recente et on met a jour sa date (timestamp)
     ask myTarget[
       let i 0
       while [i != length RLbrainId][
@@ -569,109 +569,101 @@ to GOSSIP-updateData [myTarget myBrain]
 
 end
 to GOSSIP-updateTask [myTarget]
+  if nobody != myTarget [
+    ask myTarget [
 
-  ask myTarget [
+      let newInfoList []    ; update des taches
+      let maxTime 0
+      let myIdInList 0
+      let myStatus 0
+      let myTimeStamp 0
 
-    let newInfoList []
-    let maxTime 0
-    let myIdInList 0
-    let myStatus 0
-    let myTimeStamp 0
+      let i 0
+      while [i != length LbrainId ][
 
-    let i 0
-    while [i != length LbrainId ][
+        let tmp-time 0
+        let tmp-list []
 
-      let tmp-time 0
-      let tmp-list []
-
-      if item i LbrainId = who [
-        set myIdInList  i
-      ]
-      set tmp-time item i Ltimestamp
-      set tmp-list item i Ltaskslist
-
-
-      if tmp-time > maxTime and length tmp-list > 0[
-        set maxTime tmp-time
-        set newInfoList tmp-list
-      ]
-      set i i + 1
-    ]
+        if item i LbrainId = who [
+          set myIdInList  i
+        ]
+        set tmp-time item i Ltimestamp
+        set tmp-list item i Ltaskslist
 
 
-    ;weuifhweiopfhuasioufaswofaswugfhuioawf
-    set myStatus item myIdInList Lstatus
-    set myTimeStamp item myIdInList Ltimestamp
-
-    let taskstates map [ netlogoctropnul -> 0 ] globalTasks ;newInfoList
-    foreach Lstatus [
-      x ->
-
-      if x >= 0 [
-        set taskstates replace-item x taskstates (( item x taskstates ) + 1)
+        if tmp-time > maxTime and length tmp-list > 0[
+          set maxTime tmp-time
+          set newInfoList tmp-list
+        ]
+        set i i + 1
       ]
 
-    ]
 
-    ; set taskstates ( map [ [ currentvalue maxvalue ] -> maxvalue - currentvalue ] taskstates newInfoList)
-    ;print taskstates
+      ;weuifhweiopfhuasioufaswofaswugfhuioawf
+      set myStatus item myIdInList Lstatus
+      set myTimeStamp item myIdInList Ltimestamp
 
-    let pourcentage 0
-    ifelse 0 = (item 1 taskstates) +  (item 0 taskstates) [
-      set refreshlimit 0
-    ][
-      set pourcentage min list (item 0 taskstates /( (item 1 taskstates) +  (item 0 taskstates)))  (item 1 taskstates /( (item 1 taskstates) +  (item 0 taskstates)))
-      ;set refreshlimit (75 * pourcentage * pourcentage ) - (17.5 * pourcentage)
-      ; set refreshlimit ((exp (10 * pourcentage)) - 1)
+      let taskstates map [ netlogoctropnul -> 0 ] globalTasks  ; liste des distributions de taches a partir des donnees du noeud
+      foreach Lstatus [
+        x ->
 
-
-    ]
-
-
-
-
-    set refreshrate refreshrate + 1
-
-    set taskstates ( map [ [a b] -> a - b ] globalTasks taskstates)
-
-
-
-   ; if refreshrate > 0 and ( random ((length Lstatus)* (log (length Lstatus) 2)) < 1 )[
-    if refreshrate > 0 and ( random ((length Lstatus)) < 1 )[
-
-
-      set refreshrate 0
-      ;set refreshlimit one-of [8 9 10] * (pourcentage * 10 )
-
-      let j 0
-      let newTask -1
-      let tmpValue 0
-      while [j != length taskstates][
-
-
-        if item j taskstates > tmpValue [
-          set tmpValue item j taskstates
-          set newTask j
+        if x >= 0 [
+          set taskstates replace-item x taskstates (( item x taskstates ) + 1)  ; initialisation de la liste des distributions de taches a partir des donnees du noeud
         ]
 
-        set j j + 1
-      ];end while
-      if  newTask != -1 and  newTask != mytask [
-
-
-        set color item newTask color-list
-        set myStatus newTask
-
-
-
-        set mytask newTask
-
-
-
       ]
 
 
-    ];end if
+
+
+      set refreshlimit 0 ; non pertinent sert a limiter le taux de rafraichissement si besoin ( a supprimer si on veut le limiter )
+
+
+
+
+
+      set refreshrate refreshrate + 1
+
+      set taskstates ( map [ [a b] -> a - b ] globalTasks taskstates)
+
+
+
+      ; if refreshrate > 0 and ( random ((length Lstatus)* (log (length Lstatus) 2)) < 1 )[
+      if refreshrate > 0 and ( random ((length Lstatus)) < 1 )[  ; on a une chance inverse a la longeur du reseau connu de changer d etat
+
+
+        set refreshrate 0
+
+
+        let j 0
+        let newTask -1
+        let tmpValue 0
+        while [j != length taskstates][
+
+
+          if item j taskstates > tmpValue [
+            set tmpValue item j taskstates    ; on prend la tache la moins distribuee
+            set newTask j
+          ]
+
+          set j j + 1
+        ];end while
+        if  newTask != -1 and  newTask != mytask [
+
+
+          set color item newTask color-list  ; on change de couleur et donc de tache
+          set myStatus newTask
+
+
+
+          set mytask newTask
+
+
+
+        ]
+
+
+      ];end if
 
 
 
@@ -679,13 +671,13 @@ to GOSSIP-updateTask [myTarget]
 
 
 
-    set Lstatus   replace-item myIdInList Lstatus  (myStatus)
-    set Ltaskslist    replace-item myIdInList Ltaskslist   (newInfoList)
-    set Ltimestamp    replace-item myIdInList Ltimestamp   (ticks)
+      set Lstatus   replace-item myIdInList Lstatus  (myStatus)     ;update des donnees
+      set Ltaskslist    replace-item myIdInList Ltaskslist   (newInfoList) ;update des donnees
+      set Ltimestamp    replace-item myIdInList Ltimestamp   (ticks) ;update des donnees
 
-    ;;set info-tasks newInfoList
+      ;;set info-tasks newInfoList
 
-  ]
+  ]]
 
 end
 
@@ -950,7 +942,7 @@ number-brains
 number-brains
 0
 10000
-25.0
+50.0
 1
 1
 NIL
@@ -996,7 +988,7 @@ CHOOSER
 Graph-type
 Graph-type
 "fully connected" "graph" "tree" "small word"
-2
+3
 
 CHOOSER
 7
@@ -1006,7 +998,7 @@ CHOOSER
 Algo
 Algo
 "Probabilistic" "Deterministic" "Gossip"
-1
+2
 
 SWITCH
 394
@@ -1062,7 +1054,7 @@ new-task-number
 new-task-number
 0
 1000
-5.0
+25.0
 1
 1
 NIL
@@ -1172,7 +1164,7 @@ SWITCH
 84
 record-stats
 record-stats
-0
+1
 1
 -1000
 

@@ -1,0 +1,1 @@
+Deterministic;small word;50;69
