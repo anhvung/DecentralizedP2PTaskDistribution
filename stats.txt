@@ -98,3 +98,8 @@ Gossip;small word;30;77
 Gossip;small word;30;58
 Gossip;small word;30;110
 Gossip;small word;30;59
+Gossip;small word;30;88
+Gossip;small word;30;228
+Gossip;small word;30;88
+Gossip;small word;30;73
+Gossip;small word;30;70

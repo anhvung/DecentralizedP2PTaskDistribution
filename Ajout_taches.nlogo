@@ -263,16 +263,14 @@ to stats
 
   ifelse error-value = 0 [
     set  convergence convergence + 1
-    if convergence = 50 [
+    if convergence = 50 and  number-tests < 100 [
 
-      file-type Algo  file-type ";" file-type Graph-type  file-type ";" file-type number-brains  file-type ";" file-print ticks
-      type "Saved " type number-tests type " " type Algo type " " type Graph-type type " " type number-brains type " " print ticks
+      file-type Algo  file-type ";" file-type Graph-type  file-type ";" file-type number-brains  file-type ";" file-print (ticks - 50)
+      type "Saved " type number-tests type " " type Algo type " " type Graph-type type " " type number-brains type " " print (ticks - 50)
 
       file-close
       set number-tests number-tests + 1
-      if number-tests = 100 [
-        stop
-      ]
+
       setup-task-and-graph
     ]
   ][
@@ -1154,15 +1152,33 @@ record-stats
 -1000
 
 MONITOR
-635
-667
-710
-712
-error-value
-error-value
+549
+679
+707
+724
+error-value (Pourcentage)
+error-value * 100
 17
 1
 11
+
+PLOT
+739
+652
+939
+802
+ERROR (pourcentage)
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot error-value * 100\n"
 
 @#$#@#$#@
 ## WHAT IS IT?
