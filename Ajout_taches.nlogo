@@ -250,8 +250,11 @@ to go
   let indi 0
   while[indi < number-of-types][
     set error-value error-value + (abs (item indi task-list - count brains with [color = item indi color-list]) / item indi task-list )
+
     set indi indi + 1
   ]
+
+  set error-value error-value / number-of-types
   if record-stats
   [
     stats
@@ -481,45 +484,45 @@ to GOSSIP-updateData [myTarget myBrain]
     set RLtaskslist Ltaskslist
     set RLtimestamp Ltimestamp
   ]
+  if myTarget != nobody [
+    ask myTarget[
+      let i 0
+      while [i != length RLbrainId][
 
-  ask myTarget[
-    let i 0
-    while [i != length RLbrainId][
+        let received-id item i RLbrainId
+        let received-time item i RLtimestamp
+        let k 0
+        let fixedlength length LbrainId
+        let notexsits true
+        while [k != fixedlength][
 
-      let received-id item i RLbrainId
-      let received-time item i RLtimestamp
-      let k 0
-      let fixedlength length LbrainId
-      let notexsits true
-      while [k != fixedlength][
+          let my-id item k LbrainId
+          let my-time item k Ltimestamp
 
-        let my-id item k LbrainId
-        let my-time item k Ltimestamp
+          if my-id = received-id [
+            set notexsits false
+            if my-time < received-time[
+              set Lstatus  replace-item k Lstatus  ( item i RLstatus  )
+              set Ltaskslist   replace-item k Ltaskslist   ( item i RLtaskslist   )
+              set Ltimestamp   replace-item k Ltimestamp   ( item i RLtimestamp   )
 
-        if my-id = received-id [
-          set notexsits false
-          if my-time < received-time[
-            set Lstatus  replace-item k Lstatus  ( item i RLstatus  )
-            set Ltaskslist   replace-item k Ltaskslist   ( item i RLtaskslist   )
-            set Ltimestamp   replace-item k Ltimestamp   ( item i RLtimestamp   )
-
+            ]
           ]
+
+          set k k + 1
         ]
 
-        set k k + 1
-      ]
+        if notexsits [
+          set LbrainId   lput (item i RLbrainId ) LbrainId
+          set Lstatus  lput (item i RLstatus) Lstatus
+          set Ltaskslist lput (item i RLtaskslist ) Ltaskslist
+          set Ltimestamp lput (item i RLtimestamp ) Ltimestamp
 
-      if notexsits [
-        set LbrainId   lput (item i RLbrainId ) LbrainId
-        set Lstatus  lput (item i RLstatus) Lstatus
-        set Ltaskslist lput (item i RLtaskslist ) Ltaskslist
-        set Ltimestamp lput (item i RLtimestamp ) Ltimestamp
-
+        ]
+        set i i + 1
       ]
-      set i i + 1
     ]
   ]
-
 
 
 end
