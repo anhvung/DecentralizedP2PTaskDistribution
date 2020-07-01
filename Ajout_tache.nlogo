@@ -1,6 +1,6 @@
 breed [brains brain]
 brains-own [available mytask info-tasks contains-update-agent parent-brain-id refreshrate refreshlimit LbrainId Lstatus Ltaskslist Ltimestamp]
-globals [types starttingpoint visited globalroot globalTasks number-of-types total-number-of-task task-list color-list error-value convergence number-tests]
+globals [starttingpoint visited globalroot globalTasks number-of-types total-number-of-task task-list color-list error-value convergence number-tests]
 
 
 
@@ -401,23 +401,23 @@ end
 ;;;;;;;;;;;;;;;;;; DETERMINISTIC ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to DETERMINISTIC
-  ask brains with [contains-update-agent = 1][
-    let target one-of out-link-neighbors with [mytask = 0]
+  ask brains with [contains-update-agent = 1][ ;seul l'agent qui contient l'information (update-agent = tableau des tâches restantes à distribuer) peut agir
+    let target one-of out-link-neighbors with [mytask = 0] ;on essaie de trouver un voisin qui n'a pas encore de tâche
     let n  who
     ifelse target != nobody [ ;Si il existe un voisin sans tâche, on propage l'information
-      print("target != nobody")
+      ;print("target != nobody")
       DETERMINISTIC-update-target target info-tasks
 
 
       set contains-update-agent 0
       ask target [
         set contains-update-agent 1
-        set parent-brain-id n
+        set parent-brain-id n ;l'agent à qui on donne l'information retient l'identifiant de celui qui le lui a donné
       ]
     ][ ;Sinon on fait remonter l'information à celui qui nous l'avait donné (selon un dfs) pour qu'il puisse la donner à un des ses voisins, ou la remonter plus haut
-      set target brain parent-brain-id
-      print("target = nobody")
-      DETERMINISTIC-update-target target info-tasks
+      set target brain parent-brain-id ;c'est ici qu'intervient l'identifiant de celui qui a donné l'information, il savoir vers où la faire remonter
+      ;print("target = nobody")
+      DETERMINISTIC-update-target target info-tasks ;bien que le parent soit déjà attribué à une tâche, on lui donne l'information pout qu'il puisse la retransmettre ailleurs
 
       set contains-update-agent 0
       ask target [
@@ -429,40 +429,39 @@ to DETERMINISTIC
 end
 
 to DETERMINISTIC-update-target [myTarget receinved-info-tasks]
-  print("info-tasks")
-  print(receinved-info-tasks)
+  ;print("info-tasks")
+  ;print(receinved-info-tasks)
 
-    ifelse myTarget != nobody[ ; au cas ou s'il n'y a pas de voisin
-      ask myTarget[
-        let n length receinved-info-tasks
-        let i 0
-        let done false
-        if available = 0 [ ; S'il n'est pas en train de traiter une task
-          while [(done = false) and (i < n)] [
-            ifelse (item i receinved-info-tasks) > 0 [
-              set mytask i + 1
-              set color item i color-list
-              set available 1
-              set done true
-            ][
-              set i i + 1
-            ]
-          ]
-        ]
-        set info-tasks []
-        let j 1
-        while [j <= n] [
-          let myntask item (n - j) receinved-info-tasks
-          ifelse (n - j = i) and (done = true) [
-            set info-tasks insert-item 0 info-tasks (myntask - 1)
+  ifelse myTarget != nobody[ ; on vérifie que l'on essaie bien de mettre à jour un agent existant
+    ask myTarget[
+      let i 0 ; i sera l'indice de la tâche choisie dans la liste (numéro du type - 1)
+      let done false ; done sert à arrêter la boucle while lorsque l'on a trouvé une tâche à attribuer
+      if available = 0 [ ; s'il n'est pas en train de traiter une tâche, on lui en trouve une
+        while [(done = false) and (i < number-of-types)] [
+          ifelse (item i receinved-info-tasks) > 0 [ ; on prend le premier type qui n'a pas été enièrement distribué
+            set mytask i + 1 ; le numéro de tâche correspondant est l'indice dans la liste plus 1 (i + 1)
+            set color item i color-list ; on colore le sommet avec la couleur correspondante dans la liste de couleur prédéfinie
+            set available 1  ; l'agent n'est plus disponible car on lui a trouvé une tâche, ce qui ce traduit par la valeur 1 de available
+            set done true
           ][
-            set info-tasks insert-item 0 info-tasks myntask
+            set i i + 1
           ]
-          set j j + 1
         ]
       ]
+      set info-tasks [] ; on met ensuite à jourl'information de l'agent en question afin de la transmettre au suivant
+      let j 1
+      while [j <= number-of-types] [
+        let myntask item (number-of-types - j) receinved-info-tasks ; on rempli la liste en partant de la fin car on insère les éléments au début
+        ifelse (number-of-types - j = i) and (done = true) [ ; on utilise done pour savoir si l'agent a pris une tâche ou si il ne ser que de relai à l'information (cas où il est déjà occupé)
+          set info-tasks insert-item 0 info-tasks (myntask - 1) ; il faut enlever 1 au type attribué
+        ][
+          set info-tasks insert-item 0 info-tasks myntask ; le nombre de tâche restantes à distribuer pour les autres types reste inchangé
+        ]
+        set j j + 1
+      ]
     ]
-    [print "no voisin !!!"]
+  ]
+  [print "no voisin !!!"] ; intervient si on essaie de donner l'information à un agent inexistant
 
 
 end
