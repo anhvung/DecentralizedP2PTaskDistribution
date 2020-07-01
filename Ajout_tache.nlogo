@@ -722,7 +722,7 @@ to GOSSIP-updateData [myTarget myBrain]
 
 end
 to GOSSIP-updateTask [myTarget]
-  if nobody != myTarget [
+  ifelse nobody != myTarget [
     ask myTarget [
 
       let newInfoList []    ; update des taches
@@ -799,9 +799,14 @@ to GOSSIP-updateTask [myTarget]
             set newTask j
           ]
 
+
           set j j + 1
+
+
         ];end while
-        if  newTask != -1 and  newTask != mytask [
+
+
+        ifelse  newTask != -1 and  newTask != mytask [
 
 
           set color item newTask color-list  ; on change de couleur et donc de tache
@@ -812,6 +817,32 @@ to GOSSIP-updateTask [myTarget]
           set mytask newTask
 
 
+
+        ]
+
+        [
+          set taskstates map [ x -> -1 * x ] taskstates
+           set j 0
+        set newTask -1
+        set tmpValue 0
+        while [j != length taskstates][
+
+
+          if item j taskstates > tmpValue [
+            set tmpValue item j taskstates    ; on prend la tache la moins distribuee
+            set newTask j
+          ]
+
+
+          set j j + 1
+
+
+          ];end while
+          if newTask != -1 and  newTask != mytask[
+            set color black ; on change de couleur et donc de tache
+            set myStatus -1
+            set mytask -1
+          ]
 
         ]
 
@@ -831,6 +862,10 @@ to GOSSIP-updateTask [myTarget]
       ;;set info-tasks newInfoList
 
   ]]
+
+  [
+    user-message "ERROR ISOLATED POINT IN GRAPH PRESS OK AND THEN PRESS THE SETUP BUTTON TO CONTINUE"
+  ]
 
 end
 
@@ -1095,7 +1130,7 @@ number-agents
 number-agents
 0
 1000
-104.0
+18.0
 1
 1
 NIL
@@ -1110,7 +1145,7 @@ number-connections
 number-connections
 0
 1000
-223.0
+196.0
 1
 1
 NIL
@@ -1141,7 +1176,7 @@ CHOOSER
 Graph-type
 Graph-type
 "fully connected" "random" "tree" "small word"
-2
+0
 
 CHOOSER
 6
@@ -1151,7 +1186,7 @@ CHOOSER
 Algo
 Algo
 "Probabilistic" "Deterministic" "Gossip" "Estimation-adjustment"
-0
+2
 
 SWITCH
 929
@@ -1207,7 +1242,7 @@ new-task-number
 new-task-number
 0
 1000
-26.0
+5.0
 1
 1
 NIL
@@ -1389,10 +1424,10 @@ Ne marche que si l'algorithme converge\n\nRecord stats : effectue 100 tests a la
 1
 
 TEXTBOX
-16
-140
-166
-182
+11
+141
+161
+183
 Ne concerne que le graphe aléatoire (random)\n\n
 11
 0.0
@@ -1419,20 +1454,20 @@ TEXTBOX
 1
 
 TEXTBOX
-244
-330
-274
-403
+247
+313
+277
+386
 2
 60
 0.0
 1
 
 TEXTBOX
-230
-342
-245
-567
+229
+322
+244
+547
 |\n|\n|\n|\n|\n|\n|\n|\n|
 20
 0.0
