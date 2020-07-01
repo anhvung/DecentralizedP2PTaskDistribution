@@ -1226,41 +1226,57 @@ leader-election
 -1000
 
 @#$#@#$#@
-## WHAT IS IT?
+## GENERATION DE GRAPHES
 
-Setup generates a simple graph showing a network of agents capable of solving tasks.
+Afin d’étudier l’influence de la topologie du réseau sur les performances de nos différents algorithmes, nous avons mis en place plusieurs méthodes de génération de graphes. Ainsi, il est possible de générer les topologies suivantes : arbre, petit-monde, complet, connexe aléatoire.
+Détail pour petit-monde :
 
-## HOW IT WORKS
+Afin de générer un graphe “petit-monde” (où chaque noeuds est relié aux autres via un petit nombre de noeuds intermédiaires, plus précisément le plus court chemin entre 2 noeuds varie comme ln(ordre du graphe)), on s’inspire d’un algorithme existant.
+Puis, pour chaque arête (e, s), avec une certaine probabilité (dans notre cas, nous avons choisi 40 %) : on la supprime, puis on crée une arête (e, x) où x n’est pas déjà voisin de e. 
 
-An entry point is determined randomly and will spread the information of the tasks. At each tick, each agent will randomly chose a neighbor to which to information will be sent.
+Détail pour connexe aléatoire :
 
-## HOW TO USE IT
+Ce que nous appelons “connexe aléatoire” est un graphe dont les arêtes sont créées aléatoirement, mais dont on est sûr qu’il est connexe. Pour le créer un telle graphe d’ordre n et de taille c (c >= n) : 
+on crée d’abord un arbre (n-1 arêtes) qui est donc connexe. Pour cela, on place le premier noeud puis on place les autres un par un en les reliant à chaque à un noeud existant (pris au hasard) par une arête.
+A partir de cette arbre, on répète c - n + 1 fois l’opération suivante : choisir deux noeuds puis les relier par une arête. 
+
+Le graphe obtenu n’est pas parfaitement aléatoire (car il est construit à partir d’un arbre) mais pour l’utilisation que nous en ferons ce sera une approximation satisfaisante.
 
 
 
-## THINGS TO NOTICE
 
-(suggested things for the user to notice while running the model)
 
-## THINGS TO TRY
+## ALGORITHME DETERMINISTIQUE
 
-(suggested things for the user to try to do (move sliders, switches, etc.) with the model)
+Cet algorithme fonctionne selon une logique de propagation séquentielle (par opposition à une propagation parallèle). Le principe est le suivant: 
+Un agent initial possède l’information des tâches à distribuer dans un tableau (contient un compteur du nombre de tâches restantes à distribuer pour chaque type)
+Il choisit une tâche parmis celles à effectuer (selon l’ordre de numérotation) qui devient sa nouvelle tâche
+Il fait passer le tableau à un voisin non occupé en enlevant une tâche au compteur correspondant à celle choisie
+Le voisin non occupé fait de même et retient l’agent qui lui a donné l’information
+Si tous ses voisins sont occupés, il fait remonter le tableau à l’agent parent qui le lui avait donné au départ
+L’agent parent vérifie si il a des voisins non occupés, ou fait remonter à son tour
+Lorsque l’agent initial récupère le tableau et que tous ses voisins sont occupés on a effectué un parcours en profondeur du graphe, donc tous les agents sont occupés car le graphe est par construction connexe. Si il ne récupère pas le tableau, c’est que toutes les tâches ont été distribuées. A tout instant de l’algorithme, un seul agent possède le tableau à jour des tâches restantes à distribuer, et c’est le seul qui est susceptible de se voir attribué une nouvelle tâche.
 
-## EXTENDING THE MODEL
+## GOSSIP ALGORITHM
 
-(suggested things to add or change in the Code tab to make the model more complicated, detailed, accurate, etc.)
+Cette algorithm peut être choisi sur le second menu déroulant et fonctionne de la manière suivante :
 
-## NETLOGO FEATURES
+A chaque tour chaque noeud va choisir un voisin au hasard avec une probabilité uniforme.
+Ensuite, il lui envoie ses données. On choisit de ne recevoir les données du noeud qu’on vient de choisir. Ensuite, lorsqu’un noeud donnée reçoit les données d’un autre noeud sous forme de liste, pour chaque élément de la liste reçue il va l’ajouter à ses données si elle n’existe pas (on ajoute donc un noeud au réseau connu) et si l’élément existe déjà, on compare les dates et on garde la plus récente.
 
-(interesting or unusual features of NetLogo that the model uses, particularly in the Code tab; or where workarounds were needed for missing features)
+Cette méthode permet à chaque noeud d’avoir une vision du réseau. Cette vision s’améliore au cours du temps avec les données qui se propagent le long du graphe.
 
-## RELATED MODELS
+Initialisation 
 
-(models in the NetLogo Models Library and elsewhere which are of related interest)
+L’algorithme peut commencer de deux manières :
 
-## CREDITS AND REFERENCES
+Si initialize-gossip est activé, les noeuds choisissent une tâche au hasard au début de l’algorithme
+Si initialize-gossip est désactivé, seul un noeud (choisit au hasard on par le leader election algorithm) connaît les tâches à distribuer. Les autres noeuds doivent donc attendre que l’information des tâches à distribuer se propage sur le réseau. Une fois que c’est le cas les deux cas se comportent de la même manière
 
-(a reference to the model's URL on the web if it has one, as well as any other necessary credits, citations, and links)
+
+Pour la suite on se supposera que initialize-gossip est activé et que les noeuds ont une tâche assignée au hasard dès le départ. Pour la suite, on assignera 2 types de tâche aux noeuds qui seront répartis uniforméments. (Pour 60 agents on aura 30 tâches de chaque types)
+
+
 @#$#@#$#@
 default
 true
