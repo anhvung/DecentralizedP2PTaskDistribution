@@ -9,7 +9,7 @@ globals [types starttingpoint visited globalroot globalTasks number-of-types tot
 
 
 to setup-graph
-  clear-ticks
+   clear-ticks
   clear-turtles
   clear-patches
   clear-drawing
@@ -949,7 +949,7 @@ CHOOSER
 Algo
 Algo
 "Probabilistic" "Deterministic" "Gossip"
-0
+2
 
 SWITCH
 367
