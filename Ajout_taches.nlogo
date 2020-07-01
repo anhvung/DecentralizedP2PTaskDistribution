@@ -42,7 +42,7 @@ to add-task
 
   if number-of-types = 0 [ ;; initialisation au début du programme
     set task-list list (0)(0) ;; à l'indice i se trouve le nombre de brains nécéssaires pour la tache i
-    set color-list list (red)(blue) ;; à l'indice i se trouve la couleur associée à la tache i
+    set color-list list color-list [red blue grey orange brown yellow green lime turquoise cyan sky blue violet magenta pink] ;; à l'indice i se trouve la couleur associée à la tache i
     set total-number-of-task 0
   ]
 
@@ -59,11 +59,11 @@ to add-task
     ]
     if number-of-types > 2 [
       set task-list insert-item (number-of-types - 1) task-list new-task-number
-      set color-list insert-item (number-of-types - 1) color-list one-of remove red remove blue base-colors
+
     ]
 
-    print(task-list)
-    print(number-of-types)
+    ;;print(task-list)
+    ;;print(number-of-types)
 
 
 
@@ -76,7 +76,7 @@ to reset-task
   set task-list list (0)(0)
   set total-number-of-task 0
   set number-of-types 0
-  set color-list list (red)(blue)
+  set color-list list color-list [red blue grey orange brown yellow green lime turquoise cyan sky blue violet magenta pink] ;; à l'indice i se trouve la couleur associée à la tache i
   print(task-list)
 end
 
@@ -914,7 +914,7 @@ number-brains
 number-brains
 0
 10000
-30.0
+609.0
 1
 1
 NIL
@@ -936,10 +936,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-126
-759
-189
-792
+142
+558
+215
+595
 NIL
 go
 T
@@ -960,13 +960,13 @@ CHOOSER
 Graph-type
 Graph-type
 "fully connected" "graph" "tree" "small word"
-3
+1
 
 BUTTON
-439
-13
-525
-52
+238
+10
+327
+50
 NIL
 elect-root
 NIL
@@ -990,21 +990,30 @@ Algo
 2
 
 SWITCH
+<<<<<<< HEAD
 276
 16
 414
 49
 initialize-gossip
 initialize-gossip
+=======
+418
+64
+521
+97
+initialize
+initialize
+>>>>>>> 19cab3cccde093c7c4a1ccac7f4d45155c500942
 0
 1
 -1000
 
 BUTTON
-11
-758
-104
-791
+10
+558
+103
+591
 go (1 step)
 go
 NIL
@@ -1018,10 +1027,10 @@ NIL
 1
 
 BUTTON
-1
-408
-90
-441
+131
+391
+218
+436
 Add-task
 add-task
 NIL
@@ -1035,25 +1044,25 @@ NIL
 1
 
 SLIDER
-0
-364
-212
-397
+12
+287
+216
+320
 new-task-number
 new-task-number
 0
 1000
-15.0
+80.0
 1
 1
 NIL
 HORIZONTAL
 
 BUTTON
-99
-406
-201
-439
+131
+446
+219
+487
 reset-tasks
 reset-task
 NIL
@@ -1068,9 +1077,9 @@ NIL
 
 BUTTON
 9
-594
-204
-705
+503
+218
+540
 setup
 setup-task-and-graph
 NIL
@@ -1084,21 +1093,21 @@ NIL
 1
 
 TEXTBOX
-263
-274
-486
-885
+241
+121
+464
+732
 Les instruction d'un meme numéro peuvent être exécutées dans n'importe quel ordre.\n\nLes instructions de deux numéros différents doivent être exécutée dans l'ordre croissant de numéros.\n\n1. Graph-type/ Algo/number-brains/ number-connections\n\n3. New-task-number/add-task/reset-task\n\n4.setup\n\n5. go / go(1step)
 16
 0.0
 1
 
 MONITOR
-4
-446
-201
-491
-types-of-tasks (at least 2)
+12
+334
+216
+379
+types-of-tasks (at least 2, max 14)
 task-list
 17
 1
@@ -1107,39 +1116,39 @@ task-list
 PLOT
 1158
 10
-1815
-611
-plot 1
-NIL
-NIL
+1871
+267
+Number of brains on each task
+Ticks
+Number of brains 
 0.0
 10.0
 0.0
 10.0
 true
-false
+true
 "" ""
 PENS
-"default" 1.0 0 -2674135 true "" "plot count brains with [color = red]"
-"pen-1" 1.0 0 -13345367 true "" "plot count brains with [color = blue]"
-"pen-2" 1.0 0 -7500403 true "" "plot count brains with [color = grey]"
-"pen-3" 1.0 0 -955883 true "" "plot count brains with [color = orange]"
-"pen-4" 1.0 0 -6459832 true "" "plot count brains with [color = brown]"
-"pen-5" 1.0 0 -1184463 true "" "plot count brains with [color = yellow]"
-"pen-6" 1.0 0 -10899396 true "" "plot count brains with [color = green]"
-"pen-7" 1.0 0 -13840069 true "" "plot count brains with [color = lime]"
-"pen-8" 1.0 0 -14835848 true "" "plot count brains with [color = turquoise]"
-"pen-9" 1.0 0 -11221820 true "" "plot count brains with [color = cyan]"
-"pen-10" 1.0 0 -13791810 true "" "plot count brains with [color = sky]"
-"pen-11" 1.0 0 -8630108 true "" "plot count brains with [color = violet]"
-"pen-12" 1.0 0 -5825686 true "" "plot count brains with [color = magenta]"
-"pen-13" 1.0 0 -2064490 true "" "plot count brains with [color = pink]"
+"task1" 1.0 0 -2674135 true "" "plot count brains with [color = red]"
+"task2" 1.0 0 -13345367 true "" "plot count brains with [color = blue]"
+"task3" 1.0 0 -7500403 true "" "plot count brains with [color = grey]"
+"task4" 1.0 0 -955883 true "" "plot count brains with [color = orange]"
+"task5" 1.0 0 -6459832 true "" "plot count brains with [color = brown]"
+"task6" 1.0 0 -1184463 true "" "plot count brains with [color = yellow]"
+"task7" 1.0 0 -10899396 true "" "plot count brains with [color = green]"
+"task8" 1.0 0 -13840069 true "" "plot count brains with [color = lime]"
+"task9" 1.0 0 -14835848 true "" "plot count brains with [color = turquoise]"
+"task10" 1.0 0 -11221820 true "" "plot count brains with [color = cyan]"
+"task11" 1.0 0 -13791810 true "" "plot count brains with [color = sky]"
+"task12" 1.0 0 -8630108 true "" "plot count brains with [color = violet]"
+"task13" 1.0 0 -5825686 true "" "plot count brains with [color = magenta]"
+"task14" 1.0 0 -2064490 true "" "plot count brains with [color = pink]"
 
 MONITOR
-5
-495
-111
-540
+12
+392
+126
+437
 number-of-types
 number-of-types
 17
@@ -1147,10 +1156,17 @@ number-of-types
 11
 
 SWITCH
+<<<<<<< HEAD
 259
 160
 383
 193
+=======
+238
+65
+362
+98
+>>>>>>> 19cab3cccde093c7c4a1ccac7f4d45155c500942
 record-stats
 record-stats
 0
@@ -1158,10 +1174,10 @@ record-stats
 -1000
 
 MONITOR
-549
-679
-707
-724
+1151
+308
+1309
+353
 error-value (Pourcentage)
 error-value * 100
 17
@@ -1169,10 +1185,10 @@ error-value * 100
 11
 
 PLOT
-739
-652
-939
-802
+1341
+281
+1541
+431
 ERROR (pourcentage)
 NIL
 NIL
@@ -1187,10 +1203,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot error-value * 100\n"
 
 BUTTON
-17
-264
-189
-297
+349
+10
+523
+50
 CLEAR-ALL  (Reset tests)
 CLEAR-ALL 
 NIL
