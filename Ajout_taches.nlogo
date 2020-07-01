@@ -1,6 +1,6 @@
 breed [brains brain]
 brains-own [available mytask info-tasks contains-update-agent parent-brain-id refreshrate refreshlimit LbrainId Lstatus Ltaskslist Ltimestamp]
-globals [types type1 type2 numberoftask1 numberoftask2 starttingpoint visited info globalroot globalTasks]
+globals [types starttingpoint visited globalroot globalTasks number-of-types total-number-of-task task-list color-list]
 
 
 
@@ -8,10 +8,11 @@ globals [types type1 type2 numberoftask1 numberoftask2 starttingpoint visited in
 ;;;;;;;;;;;;;;;;;;;; SETUP ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-to setup
+to setup-graph
 
   (ifelse Graph-type = "fully connected" [
     generate-fully-connected
+
     ]
     Graph-type = "graph" [
       generate-graph
@@ -21,8 +22,60 @@ to setup
     ]
     Graph-type = "small word" [
       generate-small-world
+
   ])
 
+
+
+end
+
+to add-task
+
+  if number-of-types = 0 [ ;; initialisation au début du programme
+    set task-list list (0)(0) ;; à l'indice i se trouve le nombre de brains nécéssaires pour la tache i
+    set color-list list (red)(blue) ;; à l'indice i se trouve la couleur associée à la tache i
+    set total-number-of-task 0
+  ]
+
+  if new-task-number != 0[
+
+    set number-of-types number-of-types + 1
+    set total-number-of-task (total-number-of-task + new-task-number)
+
+    if number-of-types = 1 [
+      set task-list replace-item 0 task-list new-task-number
+    ]
+    if number-of-types = 2 [
+      set task-list replace-item 1 task-list new-task-number
+    ]
+    if number-of-types > 2 [
+      set task-list insert-item (number-of-types - 1) task-list new-task-number
+      set color-list insert-item (number-of-types - 1) color-list one-of remove red remove blue base-colors
+    ]
+
+    print(task-list)
+    print(number-of-types)
+
+
+
+
+  ]
+
+end
+
+to reset-task
+  set task-list list (0)(0)
+  set total-number-of-task 0
+  set number-of-types 0
+  set color-list list (red)(blue)
+  print(task-list)
+end
+
+to setup-task
+   ifelse number-of-types < 1 [ ;; si aucune tache n'a étée ajouté avant le setup on ne peut pas faire le setup
+    print("You must add at least two tasks !")
+  ]
+  [
   (ifelse Algo = "Probabilistic" [
     setup-probabilistic
     ]
@@ -32,44 +85,57 @@ to setup
     Algo = "Gossip" [
       setup-gossip
   ])
-
-
+  ]
 
   reset-ticks
 end
 
 
+
 to setup-probabilistic
+
   ask brains[
     set available 0
     set mytask 0
     set info-tasks []
     set label-color black
+    set color black
+
   ]
-  set type1 number-type1
-  set type2 number-type2
 
   ask  one-of brains [
-    let ptask1 (type1 / (type1 + type2))
-    let ptask2 (type2 / (type1 + type2))
-    set info-tasks insert-item 0 info-tasks ptask2
-    set info-tasks insert-item 0 info-tasks ptask1
+    let i 0
+    while[i < number-of-types][
+      let ptask (item i task-list / total-number-of-task)
+      set info-tasks insert-item 0 info-tasks ptask
+      set i i + 1
+    ]
+
     PROBABILISTIC-update-target self info-tasks
   ]
+
 end
 
 to setup-deterministic
-  ask brains[set color black]
+  ask brains[
+    set color black
+    set available 0
+    let j 0
+    set info-tasks []
+    while[j < number-of-types][
+      set info-tasks insert-item 0 info-tasks (item j task-list)
+      set j j + 1
+    ]
+    set mytask 0
+  ]
 
-
-  set type1 number-type1
-  set type2 number-type2
-  let ntask1 type1
-  let ntask2 type2
-  set info []
-  set info insert-item 0 info ntask2
-  set info insert-item 0 info ntask1
-
+  let info []
+  let i 0
+    while[i < number-of-types][
+      let ntask (item i task-list)
+      set info insert-item 0 info ntask
+      set i i + 1
+    ]
   ask one-of brains [
     set color yellow
     set contains-update-agent 1
@@ -80,8 +146,13 @@ end
 
 to setup-gossip
   set globalTasks []
-  set globalTasks lput number-type1 globalTasks
-  set globalTasks lput number-type2 globalTasks
+  let i 0
+    while[i < number-of-types][
+      set globalTasks lput item i task-list globalTasks
+      set i i + 1
+    ]
+
+
   set types [red blue green]
 
   ask brains[
@@ -98,10 +169,6 @@ to setup-gossip
   ]
 
 
-  set type1 number-type1
-  set type2 number-type2
-
-
   ;Point d'entrée
   set starttingpoint one-of brains
 
@@ -109,27 +176,23 @@ to setup-gossip
   ;Point d'entrée
   ifelse initialize [
     ask brains [
-      set info-tasks insert-item 0 info-tasks type2
-      set info-tasks insert-item 0 info-tasks type1
-      let newdata 0
-
-      let savedinfo-tasks info-tasks
-      let choix random-float 1
-      ifelse choix < 0.5 [
-        set color blue
-
-        set LbrainId lput who LbrainId
-        set Lstatus lput 0 Lstatus
-        set Ltaskslist lput savedinfo-tasks Ltaskslist
-        set Ltimestamp lput -1 Ltimestamp
-      ][
-        set color red
-
-        set LbrainId lput who LbrainId
-        set Lstatus lput 1 Lstatus
-        set Ltaskslist lput savedinfo-tasks Ltaskslist
-        set Ltimestamp lput -1 Ltimestamp
+      let j 0
+      while[j < number-of-types][
+        set info-tasks insert-item 0 info-tasks (item j task-list)
+        set j j + 1
       ]
+
+      let newdata 0
+      let savedinfo-tasks info-tasks
+
+      let choix random length task-list
+      set color item choix color-list
+
+      set LbrainId lput who LbrainId
+      set Lstatus lput choix Lstatus
+      set Ltaskslist lput savedinfo-tasks Ltaskslist
+      set Ltimestamp lput -1 Ltimestamp
+
 
 
 
@@ -139,8 +202,11 @@ to setup-gossip
   [
     ask one-of brains  [
 
-      set info-tasks insert-item 0 info-tasks type2
-      set info-tasks insert-item 0 info-tasks type1
+      let k 0
+      while[k < number-of-types][
+        set info-tasks insert-item 0 info-tasks (item k task-list)
+        set k k + 1
+      ]
       let newdata 0
 
       let savedinfo-tasks info-tasks
@@ -166,6 +232,8 @@ to go
     Algo = "Gossip" [
       GOSSIP
   ])
+
+
 end
 ;;;;;;;;;;;;;;;;;;;;;;;; END GO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -189,26 +257,39 @@ end
 
 
 to PROBABILISTIC-update-target [myTarget receinved-info-tasks]
-  let myptask1 item 0 receinved-info-tasks
-  let myptask2 item 1 receinved-info-tasks
+
+  let myptask []
+  let i 0
+    while[i < number-of-types][
+      set myptask insert-item i myptask (item i receinved-info-tasks)
+      set i i + 1
+    ]
+
+
   ifelse myTarget != nobody[ ; au cas ou s'il n'y a pas de voisin
     ask myTarget[
-      set info-tasks insert-item 0 info-tasks myptask2
-      set info-tasks insert-item 0 info-tasks myptask1
+      let j 0
+      while[j < number-of-types][
+        set info-tasks insert-item 0 info-tasks (item j myptask)
+        set j j + 1
+      ]
 
       if available = 0 [ ; S'il n'est pas en train de traiter une task
-        ifelse  (random-float 1) > myptask1 [ ;Si on choisit task2
-          set mytask 2
-          set color red
 
+      let choix random-float 1
+      let total 0
+      let k 0
+        while[k < number-of-types][
+          set total total + item k info-tasks
+          if choix <= total and choix > total - item k info-tasks[
+            set color item k color-list
+            set mytask k
 
+          ]
+
+          set k k + 1
         ]
-        [;  ELSE Si on choisit task1
-          set mytask 1
-          set color blue
 
-
-        ]
 
         set available 1
       ]
@@ -228,7 +309,10 @@ to DETERMINISTIC
     let target one-of out-link-neighbors with [mytask = 0]
     let n  who
     ifelse target != nobody [ ;Si il existe un voisin sans tâche, on propage l'information
+      print("target != nobody")
       DETERMINISTIC-update-target target info-tasks
+
+
       set contains-update-agent 0
       ask target [
         set contains-update-agent 1
@@ -236,7 +320,9 @@ to DETERMINISTIC
       ]
     ][ ;Sinon on fait remonter l'information à celui qui nous l'avait donné (selon un dfs) pour qu'il puisse la donner à un des ses voisins, ou la remonter plus haut
       set target brain parent-brain-id
+      print("target = nobody")
       DETERMINISTIC-update-target target info-tasks
+
       set contains-update-agent 0
       ask target [
         set contains-update-agent 1
@@ -247,40 +333,40 @@ to DETERMINISTIC
 end
 
 to DETERMINISTIC-update-target [myTarget receinved-info-tasks]
-  let myntask1 item 0 receinved-info-tasks
-  let myntask2 item 1 receinved-info-tasks
-  ifelse myTarget != nobody[ ; au cas ou s'il n'y a pas de voisin
-    ask myTarget[
-      if available = 0 [ ; S'il n'est pas en train de traiter une task
-        if myntask1 > 0 and myntask2 = 0[
-          set mytask 1
-          set color blue
-          set myntask1 myntask1 - 1
-        ]
-        if myntask1 = 0 and myntask2 > 0[
-          set mytask 2
-          set color red
-          set myntask2 myntask2 - 1
-        ]
-        if myntask1 > 0 and myntask2 > 0[
-          ifelse random-float 1 > 0.5[
-            set mytask 1
-            set color blue
-            set myntask1 myntask1 - 1
-          ][
-            set mytask 2
-            set color red
-            set myntask2 myntask2 - 1
+  print("info-tasks")
+  print(receinved-info-tasks)
+
+    ifelse myTarget != nobody[ ; au cas ou s'il n'y a pas de voisin
+      ask myTarget[
+        let n length receinved-info-tasks
+        let i 0
+        let done false
+        if available = 0 [ ; S'il n'est pas en train de traiter une task
+          while [(done = false) and (i < n)] [
+            ifelse (item i receinved-info-tasks) > 0 [
+              set mytask i + 1
+              set color item i color-list
+              set available 1
+              set done true
+            ][
+              set i i + 1
+            ]
           ]
         ]
-        set available 1
+        set info-tasks []
+        let j 1
+        while [j <= n] [
+          let myntask item (n - j) receinved-info-tasks
+          ifelse (n - j = i) and (done = true) [
+            set info-tasks insert-item 0 info-tasks (myntask - 1)
+          ][
+            set info-tasks insert-item 0 info-tasks myntask
+          ]
+          set j j + 1
+        ]
       ]
-      set info-tasks []
-      set info-tasks insert-item 0 info-tasks myntask2
-      set info-tasks insert-item 0 info-tasks myntask1
     ]
-  ]
-  [print "no voisin !!!"]
+    [print "no voisin !!!"]
 
 
 end
@@ -515,7 +601,7 @@ to GOSSIP-updateTask [myTarget]
     set Ltaskslist    replace-item myIdInList Ltaskslist   (newInfoList)
     set Ltimestamp    replace-item myIdInList Ltimestamp   (ticks)
 
-    set info-tasks newInfoList
+    ;;set info-tasks newInfoList
 
   ]
 
@@ -739,9 +825,7 @@ to elect-root ;; va trouver le neud le plus proche de tous les autres
     set i i + 1
   ]
 
-  ask brain indiceMinimum [
-    set color  red
-  ]
+
   ask brain indiceMinimum[ ;; indiceMinimum est l'indice du noeud racine
     set color yellow
 
@@ -750,12 +834,13 @@ to elect-root ;; va trouver le neud le plus proche de tous les autres
 end
 
 ;;;;;;;;;;;;;;;;;;; END OF ELECT ROOT ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 @#$#@#$#@
 GRAPHICS-WINDOW
-226
-58
-807
-640
+503
+79
+1084
+661
 -1
 -1
 17.364
@@ -779,12 +864,12 @@ ticks
 30.0
 
 BUTTON
-17
-121
-80
-154
-NIL
-setup\n
+66
+217
+153
+258
+setup-graph
+setup-graph\n
 NIL
 1
 T
@@ -797,39 +882,39 @@ NIL
 
 SLIDER
 8
-277
+120
 220
-310
+153
 number-brains
 number-brains
 0
 100
-70.0
+100.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-4
-322
-221
-355
+7
+162
+219
+195
 number-connections
 number-connections
 0
 1000
-172.0
+147.0
 1
 1
 NIL
 HORIZONTAL
 
 BUTTON
-122
-121
-185
-154
+137
+596
+200
+629
 NIL
 go
 T
@@ -842,116 +927,21 @@ NIL
 NIL
 1
 
-SLIDER
-2
-369
-221
-402
-number-type1
-number-type1
-0
-100
-35.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-4
-408
-225
-441
-number-type2
-number-type2
-0
-100
-35.0
-1
-1
-NIL
-HORIZONTAL
-
-PLOT
-7
-457
-207
-607
-Task 1
-Tick
-Task1
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "plot count brains with [color = blue]" "plot count brains with [color = blue]"
-
-PLOT
-5
-665
-205
-815
-Task 2
-Tick
-Task 2
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "plot count brains with [color = blue]" "plot count brains with [color = red]"
-
-PLOT
-860
-73
-1599
-701
-Distribution
-Time
-Ratio
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot abs ( 50 - (100 * count brains with [color = blue]/((count brains with [color = blue]) + (count brains with [color = red]))))"
-
-MONITOR
-11
-614
-149
-659
-Blue %
-100 * count brains with [color = blue]/((count brains with [color = blue]) + (count brains with [color = red]))
-17
-1
-11
-
 CHOOSER
-28
+8
 10
-166
+220
 55
 Graph-type
 Graph-type
 "fully connected" "graph" "tree" "small word"
-3
+1
 
 BUTTON
-222
-16
-308
-49
+252
+12
+338
+51
 NIL
 elect-root
 NIL
@@ -965,53 +955,31 @@ NIL
 1
 
 CHOOSER
-28
+7
 64
-166
+221
 109
 Algo
 Algo
 "Probabilistic" "Deterministic" "Gossip"
-2
+1
 
 SWITCH
-337
-15
-440
-48
+367
+11
+470
+44
 initialize
 initialize
-0
+1
 1
 -1000
 
-MONITOR
-1060
-15
-1193
-60
-ERROR %
-abs ( 50 - (100 * count brains with [color = blue]/((count brains with [color = blue]) + (count brains with [color = red]))))
-17
-1
-11
-
-MONITOR
-7
-817
-97
-862
-Red %
-100 * count brains with [color = red]/((count brains with [color = blue]) + (count brains with [color = red]))
-17
-1
-11
-
 BUTTON
-54
-169
-147
-202
+22
+595
+115
+628
 go (1 step)
 go
 NIL
@@ -1023,6 +991,124 @@ NIL
 NIL
 NIL
 1
+
+BUTTON
+14
+413
+103
+446
+Add-task
+add-task
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+SLIDER
+9
+364
+221
+397
+new-task-number
+new-task-number
+0
+100
+16.0
+1
+1
+NIL
+HORIZONTAL
+
+BUTTON
+118
+413
+220
+446
+reset-tasks
+reset-task
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+62
+536
+167
+569
+setup-tasks
+setup-task
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+TEXTBOX
+256
+95
+479
+706
+Les instruction d'un meme numéro peuvent être exécutées dans n'importe quel ordre.\n\nLes instructions de deux numéros différents doivent être exécutée dans l'ordre croissant de numéros.\n\n1. Graph-type/ Algo/number-brains/ number-connections\n\n2. setup-graph\n\n3. New-task-number/add-task/reset-task\n\n4.setup-tasks\n\n5. go / go(1step)
+16
+0.0
+1
+
+MONITOR
+15
+467
+212
+512
+types-of-tasks
+number-of-types
+17
+1
+11
+
+PLOT
+1119
+50
+1810
+692
+plot 1
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -2674135 true "" "plot count brains with [color = red]"
+"pen-1" 1.0 0 -13345367 true "" "plot count brains with [color = blue]"
+"pen-2" 1.0 0 -7500403 true "" "plot count brains with [color = grey]"
+"pen-3" 1.0 0 -955883 true "" "plot count brains with [color = orange]"
+"pen-4" 1.0 0 -6459832 true "" "plot count brains with [color = brown]"
+"pen-5" 1.0 0 -1184463 true "" "plot count brains with [color = yellow]"
+"pen-6" 1.0 0 -10899396 true "" "plot count brains with [color = green]"
+"pen-7" 1.0 0 -13840069 true "" "plot count brains with [color = lime]"
+"pen-8" 1.0 0 -14835848 true "" "plot count brains with [color = turquoise]"
+"pen-9" 1.0 0 -11221820 true "" "plot count brains with [color = cyan]"
+"pen-10" 1.0 0 -13791810 true "" "plot count brains with [color = sky]"
+"pen-11" 1.0 0 -8630108 true "" "plot count brains with [color = violet]"
+"pen-12" 1.0 0 -5825686 true "" "plot count brains with [color = magenta]"
+"pen-13" 1.0 0 -2064490 true "" "plot count brains with [color = pink]"
 
 @#$#@#$#@
 ## WHAT IS IT?
