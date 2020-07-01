@@ -189,7 +189,7 @@ to setup-gossip
 
 
   ;Point d'entrée
-  ifelse initialize [
+  ifelse initialize-gossip [
     ask brains [
       let j 0
       while[j < number-of-types][
@@ -600,7 +600,7 @@ to GOSSIP-updateTask [myTarget]
 
 
       ; if refreshrate > 0 and ( random ((length Lstatus)* (log (length Lstatus) 2)) < 1 )[
-      if refreshrate > 0 and ( random (5 * (length Lstatus)) < 1 )[
+      if refreshrate > 0 and ( random (Gossip-Coefficient * (length Lstatus)) < 1 )[
 
 
         set refreshrate 0
@@ -992,12 +992,21 @@ Algo
 2
 
 SWITCH
+<<<<<<< HEAD
+276
+16
+414
+49
+initialize-gossip
+initialize-gossip
+=======
 418
 64
 521
 97
 initialize
 initialize
+>>>>>>> 19cab3cccde093c7c4a1ccac7f4d45155c500942
 0
 1
 -1000
@@ -1149,10 +1158,17 @@ number-of-types
 11
 
 SWITCH
+<<<<<<< HEAD
+259
+160
+383
+193
+=======
 238
 65
 362
 98
+>>>>>>> 19cab3cccde093c7c4a1ccac7f4d45155c500942
 record-stats
 record-stats
 0
@@ -1204,6 +1220,17 @@ NIL
 NIL
 NIL
 1
+
+INPUTBOX
+259
+71
+414
+131
+Gossip-Coefficient
+6.0
+1
+0
+Number
 
 @#$#@#$#@
 ## WHAT IS IT?
