@@ -155,9 +155,9 @@ to setup-estimation-adjustment
     set estimation-tasks replace-item mytask estimation-tasks 1
     set old-estimation-tasks estimation-tasks
 
-    set color blue
+    set color red
     if mytask = 1 [
-      set color red
+      set color blue
     ]
   ]
 
@@ -481,7 +481,7 @@ to adjust-task
       let r random-float 1
       if r < alpha [
         set mytask 1
-        set color red
+        set color blue
       ]
     ]
   ]
@@ -491,7 +491,7 @@ to adjust-task
       let r random-float 1
       if r < alpha [
         set mytask 0
-        set color blue
+        set color red
       ]
     ]
   ]
@@ -1100,7 +1100,7 @@ number-connections
 number-connections
 0
 1000
-168.0
+223.0
 1
 1
 NIL
@@ -1197,7 +1197,7 @@ new-task-number
 new-task-number
 0
 1000
-74.0
+26.0
 1
 1
 NIL
@@ -1438,7 +1438,6 @@ Si initialize-gossip est désactivé, seul un noeud (choisit au hasard on par le
 
 
 Pour la suite on se supposera que initialize-gossip est activé et que les noeuds ont une tâche assignée au hasard dès le départ. Pour la suite, on assignera 2 types de tâche aux noeuds qui seront répartis uniforméments. (Pour 60 agents on aura 30 tâches de chaque types)
-
 @#$#@#$#@
 default
 true
