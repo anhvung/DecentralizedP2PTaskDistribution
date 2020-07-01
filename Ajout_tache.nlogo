@@ -114,7 +114,20 @@ to setup-probabilistic
     set color black
 
   ]
+  ifelse leader-election[
+    let k elect-root
+    ask brain k[
+      let i 0
+    while[i < number-of-types][
+      let ptask (item i task-list / total-number-of-task)
+      set info-tasks insert-item 0 info-tasks ptask
+      set i i + 1
+    ]
 
+    PROBABILISTIC-update-target self info-tasks
+    ]
+
+  ][
   ask  one-of brains [
     let i 0
     while[i < number-of-types][
@@ -124,6 +137,7 @@ to setup-probabilistic
     ]
 
     PROBABILISTIC-update-target self info-tasks
+  ]
   ]
 
 end
@@ -148,10 +162,20 @@ to setup-deterministic
       set info insert-item 0 info ntask
       set i i + 1
     ]
-  ask one-of brains [
+  ifelse leader-election [
+    let k elect-root
+    ask  brain k[
     set color yellow
     set contains-update-agent 1
     DETERMINISTIC-update-target self info
+  ]
+  ][
+    ask one-of brains [
+    set color yellow
+    set contains-update-agent 1
+    DETERMINISTIC-update-target self info
+  ]
+
   ]
 
 end
@@ -183,7 +207,15 @@ to setup-gossip
 
 
   ;Point d'entrée
-  set starttingpoint one-of brains
+
+  ifelse leader-election[
+    let p elect-root
+    set starttingpoint brain p
+  ][
+    set starttingpoint one-of brains
+  ]
+
+
 
 
   ;Point d'entrée
@@ -213,6 +245,24 @@ to setup-gossip
     ]
   ]
   [
+    ifelse leader-election[
+      let q elect-root
+      ask brain q[
+      let k 0
+      while[k < number-of-types][
+        set info-tasks insert-item 0 info-tasks (item k task-list)
+        set k k + 1
+      ]
+      let newdata 0
+
+      let savedinfo-tasks info-tasks
+      set LbrainId lput who LbrainId
+      set Lstatus lput -1 Lstatus
+      set Ltaskslist lput savedinfo-tasks Ltaskslist
+      set Ltimestamp lput -1 Ltimestamp
+      ]
+
+    ][
     ask one-of brains  [
 
       let k 0
@@ -228,6 +278,7 @@ to setup-gossip
       set Ltaskslist lput savedinfo-tasks Ltaskslist
       set Ltimestamp lput -1 Ltimestamp
 
+    ]
     ]
   ]
 end
@@ -796,7 +847,7 @@ end
 ;;;;;;;;;;;;;;;;;;; ELECT ROOT ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-to elect-root ;; va trouver le neud le plus proche de tous les autres
+to-report elect-root;; va trouver le neud le plus proche de tous les autres
 
   let minimum number-brains * number-brains
   let indiceMinimum 0
@@ -864,12 +915,11 @@ to elect-root ;; va trouver le neud le plus proche de tous les autres
     ]
     set i i + 1
   ]
-
-
-  ask brain indiceMinimum[ ;; indiceMinimum est l'indice du noeud racine
+  ask brain indiceMinimum[
     set color yellow
-
   ]
+  report indiceMinimum
+
 
 end
 
@@ -911,7 +961,7 @@ number-brains
 number-brains
 0
 10000
-609.0
+25.0
 1
 1
 NIL
@@ -926,7 +976,7 @@ number-connections
 number-connections
 0
 1000
-325.0
+51.0
 1
 1
 NIL
@@ -957,24 +1007,7 @@ CHOOSER
 Graph-type
 Graph-type
 "fully connected" "graph" "tree" "small word"
-1
-
-BUTTON
-238
-10
-327
-50
-NIL
-elect-root
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
+2
 
 CHOOSER
 7
@@ -984,13 +1017,13 @@ CHOOSER
 Algo
 Algo
 "Probabilistic" "Deterministic" "Gossip"
-2
+1
 
 SWITCH
-418
-64
-521
-97
+394
+50
+542
+83
 initialize
 initialize
 0
@@ -1040,7 +1073,7 @@ new-task-number
 new-task-number
 0
 1000
-80.0
+5.0
 1
 1
 NIL
@@ -1144,10 +1177,10 @@ number-of-types
 11
 
 SWITCH
-238
-65
-362
-98
+231
+51
+384
+84
 record-stats
 record-stats
 0
@@ -1184,10 +1217,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot error-value * 100\n"
 
 BUTTON
-349
+230
 10
-523
-50
+386
+45
 CLEAR-ALL  (Reset tests)
 CLEAR-ALL 
 NIL
@@ -1199,6 +1232,17 @@ NIL
 NIL
 NIL
 1
+
+SWITCH
+395
+10
+543
+43
+leader-election
+leader-election
+1
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
