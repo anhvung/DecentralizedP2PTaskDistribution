@@ -345,10 +345,6 @@ to go
       while[indi < number-of-types][
 
         set error-value error-value + (abs (item indi task-list - count brains with [color = item (number-of-types - indi - 1) color-list]) / item indi task-list )
-        print red = item indi color-list
-        print count brains with [color = item indi color-list]
-        print item indi task-list
-        print indi
 
 
         set indi indi + 1
@@ -368,10 +364,7 @@ to go
       while[indi < number-of-types][
 
         set error-value error-value + (abs (item indi task-list - count brains with [color = item indi color-list]) / item indi task-list )
-        print red = item indi color-list
-        print count brains with [color = item indi color-list]
-        print item indi task-list
-        print indi
+
 
 
         set indi indi + 1
