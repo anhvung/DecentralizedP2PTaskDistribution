@@ -114,7 +114,7 @@ to setup-probabilistic
     set color black
 
   ]
-  ifelse leader-election[
+  ifelse leader-election[ ;;si le leader-election est sur off alors on innitialise le point d'entrée à l'aide de la fonction elect-root
     let k elect-root
     ask brain k[
       let i 0
@@ -127,7 +127,7 @@ to setup-probabilistic
     PROBABILISTIC-update-target self info-tasks
     ]
 
-  ][
+  ][ ;; sinon on prend un point d'entrée au hasard
   ask  one-of brains [
     let i 0
     while[i < number-of-types][
@@ -162,14 +162,14 @@ to setup-deterministic
       set info insert-item 0 info ntask
       set i i + 1
     ]
-  ifelse leader-election [
+  ifelse leader-election [;;si le leader-election est sur off alors on innitialise le point d'entrée à l'aide de la fonction elect-root
     let k elect-root
     ask  brain k[
     set color yellow
     set contains-update-agent 1
     DETERMINISTIC-update-target self info
   ]
-  ][
+  ][ ;; sinon on prend un point d'entrée au hasard
     ask one-of brains [
     set color yellow
     set contains-update-agent 1
@@ -245,7 +245,7 @@ to setup-gossip
     ]
   ]
   [
-    ifelse leader-election[
+    ifelse leader-election[ ;;si le leader-election est sur off alors on innitialise le point d'entrée à l'aide de la fonction elect-root
       let q elect-root
       ask brain q[
       let k 0
@@ -262,7 +262,7 @@ to setup-gossip
       set Ltimestamp lput -1 Ltimestamp
       ]
 
-    ][
+    ][ ;; sinon on prend un point d'entrée au hasard
     ask one-of brains  [
 
       let k 0
@@ -846,7 +846,7 @@ end
 ;;;;;;;;;;;;;;;;;;; ELECT ROOT ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-to-report elect-root;; va trouver le neud le plus proche de tous les autres
+to-report elect-root;; va trouver le neud le plus proche de tous les autres et renvoyer son indice
 
   let minimum number-brains * number-brains
   let indiceMinimum 0
@@ -859,7 +859,7 @@ to-report elect-root;; va trouver le neud le plus proche de tous les autres
     let level 1 ;; level est la distance à laquelle on se situe du noeud i étudié
 
 
-    ask brain i[ ;; premiere étape : on crée la liste de taille number-brains en mettant des 1 pour les voisins du noeud étudié et des number-brains - 1 ailleurs
+    ask brain i[ ;; premiere étape : on crée la liste de taille number-brains en mettant des 1 pour les voisins du noeud étudié et des (number-brains - 1) ailleurs
       while [j < number-brains][
         set liste insert-item j liste (number-brains - 1) ;; on inititalise les distances à la distance maximale possible
 
@@ -914,10 +914,8 @@ to-report elect-root;; va trouver le neud le plus proche de tous les autres
     ]
     set i i + 1
   ]
-  ask brain indiceMinimum[
-    set color yellow
-  ]
-  report indiceMinimum
+
+  report indiceMinimum ;renvoit l'incide du noeud le plus proche des autres
 
 
 end
