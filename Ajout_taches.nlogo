@@ -891,17 +891,17 @@ number-connections
 number-connections
 0
 1000
-147.0
+325.0
 1
 1
 NIL
 HORIZONTAL
 
 BUTTON
-137
-596
-200
-629
+126
+759
+189
+792
 NIL
 go
 T
@@ -949,7 +949,7 @@ CHOOSER
 Algo
 Algo
 "Probabilistic" "Deterministic" "Gossip"
-0
+2
 
 SWITCH
 367
@@ -958,15 +958,15 @@ SWITCH
 44
 initialize
 initialize
-1
+0
 1
 -1000
 
 BUTTON
-22
-595
-115
-628
+11
+758
+104
+791
 go (1 step)
 go
 NIL
@@ -980,10 +980,10 @@ NIL
 1
 
 BUTTON
-8
-313
-97
-346
+1
+408
+90
+441
 Add-task
 add-task
 NIL
@@ -997,10 +997,10 @@ NIL
 1
 
 SLIDER
-7
-269
-219
-302
+0
+364
+212
+397
 new-task-number
 new-task-number
 0
@@ -1012,10 +1012,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-112
-313
-214
-346
+99
+406
+201
+439
 reset-tasks
 reset-task
 NIL
@@ -1029,10 +1029,10 @@ NIL
 1
 
 BUTTON
-18
-459
-213
-513
+0
+614
+195
+725
 setup-tasks
 setup-task-and-graph
 NIL
@@ -1056,12 +1056,12 @@ Les instruction d'un meme numéro peuvent être exécutées dans n'importe quel 
 1
 
 MONITOR
-11
-351
-208
-396
-types-of-tasks
-number-of-types
+4
+446
+201
+491
+types-of-tasks (at least 2)
+task-list
 17
 1
 11
@@ -1096,6 +1096,17 @@ PENS
 "pen-11" 1.0 0 -8630108 true "" "plot count brains with [color = violet]"
 "pen-12" 1.0 0 -5825686 true "" "plot count brains with [color = magenta]"
 "pen-13" 1.0 0 -2064490 true "" "plot count brains with [color = pink]"
+
+MONITOR
+5
+495
+111
+540
+number-of-types
+number-of-types
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?

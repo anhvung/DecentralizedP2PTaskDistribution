@@ -9,7 +9,7 @@ globals [types starttingpoint visited globalroot globalTasks number-of-types tot
 
 
 to setup-graph
-   clear-ticks
+  clear-ticks
   clear-turtles
   clear-patches
   clear-drawing
@@ -891,7 +891,7 @@ number-connections
 number-connections
 0
 1000
-147.0
+325.0
 1
 1
 NIL
@@ -958,7 +958,7 @@ SWITCH
 44
 initialize
 initialize
-1
+0
 1
 -1000
 
@@ -1029,10 +1029,10 @@ NIL
 1
 
 BUTTON
-18
-459
-213
-513
+11
+451
+206
+562
 setup-tasks
 setup-task-and-graph
 NIL
@@ -1060,8 +1060,8 @@ MONITOR
 351
 208
 396
-types-of-tasks
-number-of-types
+types-of-tasks (at least 2)
+task-list
 17
 1
 11
@@ -1096,6 +1096,13 @@ PENS
 "pen-11" 1.0 0 -8630108 true "" "plot count brains with [color = violet]"
 "pen-12" 1.0 0 -5825686 true "" "plot count brains with [color = magenta]"
 "pen-13" 1.0 0 -2064490 true "" "plot count brains with [color = pink]"
+
+OUTPUT
+24
+405
+264
+459
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
