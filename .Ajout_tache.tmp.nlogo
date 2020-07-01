@@ -59,6 +59,8 @@ to add-task
       Algo = "Estimation-adjustment" [
         print("With Estimation-adjustment only 2 types of task can be added")
         user-message ("With Estimation-adjustment only 2 types of task can be added")
+        set number-of-types number-of-types - 1
+        set total-number-of-task (total-number-of-task - new-task-number)
 
     ][
 
@@ -1093,7 +1095,7 @@ number-agents
 number-agents
 0
 1000
-100.0
+104.0
 1
 1
 NIL
@@ -1149,7 +1151,7 @@ CHOOSER
 Algo
 Algo
 "Probabilistic" "Deterministic" "Gossip" "Estimation-adjustment"
-1
+0
 
 SWITCH
 929
@@ -1197,10 +1199,10 @@ NIL
 1
 
 SLIDER
-4
-350
-208
-383
+7
+323
+211
+356
 new-task-number
 new-task-number
 0
@@ -1378,10 +1380,10 @@ leader-designation
 
 TEXTBOX
 579
-662
+654
 729
-774
-Record stats : effectue 100 tests a la suite (Small word peut avoir des points isolés et donc empécher la convergence. Appuyer sur setup dans ce cas)\nLes résultats seront sur le fichier stats.txt\n
+808
+Ne marche que si l'algorithme converge\n\nRecord stats : effectue 100 tests a la suite (Small word peut avoir des points isolés et donc empécher la convergence. Appuyer sur setup dans ce cas)\nLes résultats seront sur le fichier stats.txt\n
 11
 0.0
 1
@@ -1391,7 +1393,7 @@ TEXTBOX
 140
 166
 182
-ne concerne que le graphe aléatoire (random)\n\n
+Ne concerne que le graphe aléatoire (random)\n\n
 11
 0.0
 1
@@ -1521,16 +1523,16 @@ TEXTBOX
 656
 1171
 768
-SEULEMENT POUR L'ALGORITHME GOSSIP\nON : Initialiser tous les agents avec une tâche au hasard\nOFF : Seul un agent est possède une tâche au départ (choisi soit au hasard soit avec le leader designation)
+SEULEMENT POUR L'ALGORITHME GOSSIP\nON : Initialiser tous les agents avec une tâche au hasard\nOFF : Seul un agent possède une tâche au départ (choisi soit au hasard soit avec le leader designation)
 11
 0.0
 1
 
 TEXTBOX
 754
-662
+658
 904
-788
+784
 Pour les algorithmes probabilistic, deterministic et gossip (si initialize-all-gossip est OFF)\nON : l'algorithme part d'un agent au hasard\nOFF : l'algorithme part de l'agent désigné par la fonction leader designation
 11
 0.0
@@ -1547,11 +1549,61 @@ Erreur :\nMoyenne des erreurs relatives par type de tâche en pourcentage
 1
 
 TEXTBOX
-1598
-536
-1748
-554
-PAF
+1426
+487
+1576
+563
+Florian Le Mouël\nAnh-Vu Nguyen\nDavid Gérard\nArthur Gourrin
+15
+0.0
+1
+
+TEXTBOX
+13
+360
+163
+388
+Ajoute new-task-number tâches d'un nouveau type
+11
+0.0
+1
+
+TEXTBOX
+1423
+424
+1809
+476
+PROJET PAF GROUPE 1  -  Decentralised Task-distribution in Peer-to-Peer Networks
+20
+0.0
+1
+
+TEXTBOX
+1413
+406
+1816
+434
+__________________________________________________________________
+11
+0.0
+1
+
+TEXTBOX
+1413
+570
+1813
+612
+__________________________________________________________________
+11
+0.0
+1
+
+TEXTBOX
+1411
+417
+1427
+584
+|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n
 11
 0.0
 1
