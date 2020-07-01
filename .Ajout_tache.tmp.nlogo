@@ -821,10 +821,10 @@ to GOSSIP-updateTask [myTarget]
         ]
 
         [
-          set taskstates map [ x -> -1x ] taskstates
-           let j 0
-        let newTask -1
-        let tmpValue 0
+          set taskstates map [ x -> -1 * x ] taskstates
+           set j 0
+        set newTask -1
+        set tmpValue 0
         while [j != length taskstates][
 
 
@@ -839,7 +839,7 @@ to GOSSIP-updateTask [myTarget]
 
           ];end while
           if newTask != -1 and  newTask != mytask[
-            set color item newTask black ; on change de couleur et donc de tache
+            set color  black ; on change de couleur et donc de tache
             set myStatus -1
             set mytask -1
           ]
@@ -1130,7 +1130,7 @@ number-agents
 number-agents
 0
 1000
-104.0
+60.0
 1
 1
 NIL
@@ -1145,7 +1145,7 @@ number-connections
 number-connections
 0
 1000
-196.0
+197.0
 1
 1
 NIL
@@ -1242,7 +1242,7 @@ new-task-number
 new-task-number
 0
 1000
-26.0
+30.0
 1
 1
 NIL
