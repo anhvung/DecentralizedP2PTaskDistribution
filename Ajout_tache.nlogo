@@ -211,7 +211,7 @@ to setup-gossip
 
 
   ;Point d'entrée
-  ifelse initialize-gossip [ ; Si ON alors on initalise les noeuds au hasard
+  ifelse initialize-all-gossip [ ; Si ON alors on initalise les noeuds au hasard
     ask brains [
       let j 0
       while[j < number-of-types][
@@ -942,7 +942,7 @@ number-brains
 number-brains
 0
 10000
-30.0
+40.0
 1
 1
 NIL
@@ -988,7 +988,7 @@ CHOOSER
 Graph-type
 Graph-type
 "fully connected" "random" "tree" "small word"
-1
+3
 
 CHOOSER
 7
@@ -1003,10 +1003,10 @@ Algo
 SWITCH
 394
 50
-542
+548
 83
-initialize-gossip
-initialize-gossip
+initialize-all-gossip
+initialize-all-gossip
 0
 1
 -1000
@@ -1054,7 +1054,7 @@ new-task-number
 new-task-number
 0
 1000
-15.0
+10.0
 1
 1
 NIL
@@ -1095,10 +1095,10 @@ NIL
 1
 
 TEXTBOX
-241
-121
-464
-732
+240
+196
+463
+807
 Les instruction d'un meme numéro peuvent être exécutées dans n'importe quel ordre.\n\nLes instructions de deux numéros différents doivent être exécutée dans l'ordre croissant de numéros.\n\n1. Graph-type/ Algo/number-brains/ number-connections\n\n3. New-task-number/add-task/reset-task\n\n4.setup\n\n5. go / go(1step)
 16
 0.0
@@ -1120,7 +1120,7 @@ PLOT
 10
 1871
 267
-Number of brains on each task
+Number of agents on each task
 Ticks
 Number of brains 
 0.0
@@ -1164,7 +1164,7 @@ SWITCH
 84
 record-stats
 record-stats
-0
+1
 1
 -1000
 
@@ -1224,6 +1224,26 @@ leader-election
 1
 1
 -1000
+
+TEXTBOX
+245
+90
+395
+160
+Record stats : effectue 100 tests a la suite (Small word peut avoir des points isolés --> appuyer sur setup dans ce cas)
+11
+0.0
+1
+
+TEXTBOX
+29
+201
+179
+243
+ne concerne que le graphe aléatoire\n\n
+11
+0.0
+1
 
 @#$#@#$#@
 ## GENERATION DE GRAPHES
