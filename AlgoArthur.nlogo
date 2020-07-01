@@ -45,6 +45,47 @@ to generate-graph
 
 end
 
+to generate-small-world
+  clear-all
+  ask patches [
+    set pcolor white
+  ]
+
+  create-brains number-brains [
+    set shape "circle"
+  ]
+
+  layout-circle (sort brains) max-pxcor - 1
+
+  let i 0
+  while [i < number-brains][
+    ask brain i [
+      create-link-with brain ((i + 1) mod number-brains)
+      create-link-with brain ((i + 2) mod number-brains)
+    ]
+    set i i + 1
+  ]
+
+  ask links [
+    if (random-float 1) < 0.4 [
+      let node1 end1
+      if [count link-neighbors] of end1 < (number-brains - 1) [
+        let node2 one-of brains with [(self != node1) and (not link-neighbor? node1)]
+        ask node1 [
+          create-link-with node2
+        ]
+        die
+      ]
+    ]
+  ]
+
+  setup-agents
+
+  reset-ticks
+
+end
+
+
 to setup-agents
   ask brains[
     set available 0
@@ -87,21 +128,29 @@ to setup-agents
 end
 
 to go
+
+  generate-graph
+
+  file-open "stats.txt"
+  let err 0
+  set err abs (task-repartition - number-task0 / number-brains)
+  file-type err file-type ";"
+
   while [alpha > 0][
     iterate
     tick
   ]
+
+  set err abs (task-repartition - number-task0 / number-brains)
+  file-type err file-type "\n"
+
+  file-close
 
 end
 
 to observe
   ask brains [
     let lst old-estimation-tasks
-
-    let v 0
-    ask link-neighbors [
-      set v v + 1
-    ]
 
     ask link-neighbors [
       let i 0
@@ -118,8 +167,6 @@ to observe
     let s 0
     while [i < length lst][
       let n item i lst
-      ;set lst replace-item i lst (n / v)
-      ;set n item i lst
       set s s + n
       set i i + 1
     ]
@@ -228,7 +275,7 @@ number-brains
 number-brains
 2
 1000
-307.0
+100.0
 1
 1
 NIL
@@ -243,7 +290,7 @@ number-connections
 number-connections
 1
 3000
-1059.0
+2000.0
 1
 1
 NIL
@@ -273,7 +320,7 @@ BUTTON
 190
 NIL
 go
-NIL
+T
 1
 T
 OBSERVER
@@ -292,7 +339,7 @@ task-repartition
 task-repartition
 0
 1
-0.2
+0.38
 0.01
 1
 NIL
@@ -327,17 +374,6 @@ MONITOR
 268
 number task 1 (red)
 number-task1
-17
-1
-11
-
-MONITOR
-53
-304
-268
-349
-NIL
-number-task0 / number-brains
 17
 1
 11

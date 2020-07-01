@@ -588,3 +588,11 @@ Deterministic;random;50;113
 Deterministic;random;50;111
 Deterministic;random;50;134
 Deterministic;random;50;124
+Deterministic;random;50;124
+Deterministic;random;50;133
+Deterministic;random;50;140
+Deterministic;random;50;146
+Deterministic;random;50;108
+Deterministic;random;50;132
+Deterministic;random;50;139
+Deterministic;random;50;132
