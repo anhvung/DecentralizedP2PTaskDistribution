@@ -340,7 +340,10 @@ to go
   set error-value 0
   let indi 0
   while[indi < number-of-types][
+    if item indi task-list - count brains with [color = item indi color-list] > 0 [
     set error-value error-value + (abs (item indi task-list - count brains with [color = item indi color-list]) / item indi task-list )
+    ]
+    
 
     set indi indi + 1
   ]
