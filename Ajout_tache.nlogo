@@ -345,6 +345,7 @@ to go
     set indi indi + 1
   ]
 
+
   set error-value error-value / number-of-types
   if record-stats
   [
@@ -1101,7 +1102,7 @@ number-agents
 number-agents
 0
 1000
-102.0
+208.0
 1
 1
 NIL
@@ -1116,7 +1117,7 @@ number-connections
 number-connections
 0
 1000
-91.0
+92.0
 1
 1
 NIL
@@ -1147,7 +1148,7 @@ CHOOSER
 Graph-type
 Graph-type
 "fully connected" "random" "tree" "small word"
-0
+2
 
 CHOOSER
 6
@@ -1157,7 +1158,7 @@ CHOOSER
 Algo
 Algo
 "Probabilistic" "Deterministic" "Gossip" "Estimation-adjustment"
-2
+1
 
 SWITCH
 929
@@ -1213,7 +1214,7 @@ new-task-number
 new-task-number
 0
 1000
-106.0
+83.0
 1
 1
 NIL
@@ -1625,6 +1626,14 @@ TEXTBOX
 1
 
 @#$#@#$#@
+# TUTORIEL
+
+
+[CLIQUER POUR VOIR LE TUTORIEL](https://docs.google.com/document/d/1kP-bbcegr0l-avVXos6BxKUSfCFzBU7F-MAvanF6M4c/edit#heading=h.2gazcsgmxkub)
+
+# Autre
+
+[Lien vers le dépôt GIT](https://gitlab.telecom-paris.fr/PAF/1920/prj16-1/-/tree/master)
 ## GENERATION DE GRAPHES
 
 Afin d’étudier l’influence de la topologie du réseau sur les performances de nos différents algorithmes, nous avons mis en place plusieurs méthodes de génération de graphes. Ainsi, il est possible de générer les topologies suivantes : arbre, petit-monde, complet, connexe aléatoire.
