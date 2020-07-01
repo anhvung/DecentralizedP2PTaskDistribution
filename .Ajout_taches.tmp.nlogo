@@ -1,6 +1,6 @@
 breed [brains brain]
 brains-own [available mytask info-tasks contains-update-agent parent-brain-id refreshrate refreshlimit LbrainId Lstatus Ltaskslist Ltimestamp]
-globals [types starttingpoint visited globalroot globalTasks number-of-types total-number-of-task task-list color-list]
+globals [types starttingpoint visited globalroot globalTasks number-of-types total-number-of-task task-list color-list error-value convergence number-tests]
 
 
 
@@ -31,7 +31,10 @@ to setup-graph
 
   ])
 
+  set  convergence 0
 
+  file-open "stats.txt"
+  reset-ticks
 
 end
 
@@ -243,7 +246,38 @@ to go
       GOSSIP
   ])
 
+  set error-value 0
+  let indi 0
+  while[indi < number-of-types][
+    set error-value error-value + (abs (item indi task-list - count brains with [color = item indi color-list]) / item indi task-list )
+    set indi indi + 1
+  ]
+  if record-stats
+  [
+    stats
+  ]
 
+end
+to stats
+
+
+  ifelse error-value = 0 [
+    set  convergence convergence + 1
+    if convergence = 50 [
+
+      file-type Algo  file-type ";" file-type Graph-type  file-type ";" file-type number-brains  file-type ";" file-print ticks
+      type "Saved number-tests" type Algo type " " type Graph-type type " " type number-brains type " " print ticks
+
+      file-close
+      set number-tests number-tests + 1
+      if number-tests = 100 [
+        stop
+      ]
+      setup-task-and-graph
+    ]
+  ][
+    set  convergence 0
+  ]
 end
 ;;;;;;;;;;;;;;;;;;;;;;;; END GO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -841,10 +875,10 @@ end
 ;;;;;;;;;;;;;;;;;;; END OF ELECT ROOT ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 @#$#@#$#@
 GRAPHICS-WINDOW
-503
-79
-1084
-661
+550
+10
+1131
+592
 -1
 -1
 17.364
@@ -876,7 +910,7 @@ number-brains
 number-brains
 0
 10000
-60.0
+30.0
 1
 1
 NIL
@@ -898,10 +932,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-137
-596
-200
-629
+126
+759
+189
+792
 NIL
 go
 T
@@ -925,10 +959,10 @@ Graph-type
 3
 
 BUTTON
-252
-12
-338
-51
+439
+13
+525
+52
 NIL
 elect-root
 NIL
@@ -952,10 +986,10 @@ Algo
 2
 
 SWITCH
-367
-11
-470
-44
+428
+77
+531
+110
 initialize
 initialize
 0
@@ -963,10 +997,10 @@ initialize
 -1000
 
 BUTTON
-22
-595
-115
-628
+11
+758
+104
+791
 go (1 step)
 go
 NIL
@@ -980,10 +1014,10 @@ NIL
 1
 
 BUTTON
-8
-313
-97
-346
+1
+408
+90
+441
 Add-task
 add-task
 NIL
@@ -997,25 +1031,25 @@ NIL
 1
 
 SLIDER
-7
-269
-219
-302
+0
+364
+212
+397
 new-task-number
 new-task-number
 0
 1000
-20.0
+15.0
 1
 1
 NIL
 HORIZONTAL
 
 BUTTON
-112
-313
-214
-346
+99
+406
+201
+439
 reset-tasks
 reset-task
 NIL
@@ -1029,11 +1063,11 @@ NIL
 1
 
 BUTTON
-11
-451
-206
-562
-setup-tasks
+9
+594
+204
+705
+setup
 setup-task-and-graph
 NIL
 1
@@ -1046,20 +1080,20 @@ NIL
 1
 
 TEXTBOX
-256
-95
-479
-706
-Les instruction d'un meme numéro peuvent être exécutées dans n'importe quel ordre.\n\nLes instructions de deux numéros différents doivent être exécutée dans l'ordre croissant de numéros.\n\n1. Graph-type/ Algo/number-brains/ number-connections\n\n2. setup-graph\n\n3. New-task-number/add-task/reset-task\n\n4.setup-tasks\n\n5. go / go(1step)
+263
+274
+486
+885
+Les instruction d'un meme numéro peuvent être exécutées dans n'importe quel ordre.\n\nLes instructions de deux numéros différents doivent être exécutée dans l'ordre croissant de numéros.\n\n1. Graph-type/ Algo/number-brains/ number-connections\n\n3. New-task-number/add-task/reset-task\n\n4.setup\n\n5. go / go(1step)
 16
 0.0
 1
 
 MONITOR
-11
-351
-208
-396
+4
+446
+201
+491
 types-of-tasks (at least 2)
 task-list
 17
@@ -1067,10 +1101,10 @@ task-list
 11
 
 PLOT
-1119
-50
-1810
-692
+1158
+10
+1815
+611
 plot 1
 NIL
 NIL
@@ -1097,11 +1131,37 @@ PENS
 "pen-12" 1.0 0 -5825686 true "" "plot count brains with [color = magenta]"
 "pen-13" 1.0 0 -2064490 true "" "plot count brains with [color = pink]"
 
-OUTPUT
-24
-405
-264
-459
+MONITOR
+5
+495
+111
+540
+number-of-types
+number-of-types
+17
+1
+11
+
+SWITCH
+268
+76
+392
+109
+record-stats
+record-stats
+0
+1
+-1000
+
+MONITOR
+635
+667
+710
+712
+error-value
+error-value
+17
+1
 11
 
 @#$#@#$#@
