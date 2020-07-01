@@ -20,7 +20,7 @@ to setup-graph
     generate-fully-connected
 
     ]
-    Graph-type = "graph" [
+    Graph-type = "random" [
       generate-graph
     ]
     Graph-type = "tree" [
@@ -33,7 +33,7 @@ to setup-graph
 
   set  convergence 0
 
-  file-open "stats.txt"
+  file-open "30.txt"
   reset-ticks
 
 end
@@ -942,7 +942,7 @@ number-brains
 number-brains
 0
 10000
-50.0
+30.0
 1
 1
 NIL
@@ -957,7 +957,7 @@ number-connections
 number-connections
 0
 1000
-51.0
+52.0
 1
 1
 NIL
@@ -987,8 +987,8 @@ CHOOSER
 55
 Graph-type
 Graph-type
-"fully connected" "graph" "tree" "small word"
-3
+"fully connected" "random" "tree" "small word"
+1
 
 CHOOSER
 7
@@ -1054,7 +1054,7 @@ new-task-number
 new-task-number
 0
 1000
-25.0
+15.0
 1
 1
 NIL
@@ -1164,7 +1164,7 @@ SWITCH
 84
 record-stats
 record-stats
-1
+0
 1
 -1000
 
