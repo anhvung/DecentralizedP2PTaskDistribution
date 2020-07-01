@@ -1,6 +1,6 @@
 breed [brains brain]
-brains-own [available mytask info-tasks contains-update-agent parent-brain-id refreshrate refreshlimit LbrainId Lstatus Ltaskslist Ltimestamp]
-globals [starttingpoint visited globalroot globalTasks number-of-types total-number-of-task task-list color-list error-value convergence number-tests]
+brains-own [available mytask estimation-tasks old-estimation-tasks info-tasks contains-update-agent parent-brain-id refreshrate refreshlimit LbrainId Lstatus Ltaskslist Ltimestamp]
+globals [starttingpoint number-task0 number-task1 task-repartition alpha visited globalroot globalTasks number-of-types total-number-of-task task-list color-list error-value convergence number-tests]
 
 
 
@@ -18,7 +18,6 @@ to setup-graph
 
   (ifelse Graph-type = "fully connected" [
     generate-fully-connected
-
     ]
     Graph-type = "random" [
       generate-graph
@@ -28,10 +27,9 @@ to setup-graph
     ]
     Graph-type = "small word" [
       generate-small-world
-
   ])
 
-  set  convergence 0
+  set convergence 0
 
   file-open "30.txt"
   reset-ticks
@@ -65,9 +63,6 @@ to add-task
     ;;print(task-list)
     ;;print(number-of-types)
 
-
-
-
   ]
 
 end
@@ -96,12 +91,14 @@ to setup-task-and-graph
       ]
       Algo = "Gossip" [
         setup-gossip
+      ]
+      Algo = "Estimation-adjustment" [
+        setup-estimation-adjustment
     ])
   ]
 
   reset-ticks
 end
-
 
 
 to setup-probabilistic
@@ -139,6 +136,45 @@ to setup-probabilistic
       PROBABILISTIC-update-target self info-tasks
     ]
   ]
+
+end
+
+to setup-estimation-adjustment
+  set task-repartition (item 0 task-list) / number-brains
+
+  ask brains[
+    set available 0
+
+    set mytask 1
+    let r random-float 1
+    if r < task-repartition [
+      set mytask 0
+    ]
+
+    set estimation-tasks list 0 0
+    set estimation-tasks replace-item mytask estimation-tasks 1
+    set old-estimation-tasks estimation-tasks
+
+    set color blue
+    if mytask = 1 [
+      set color red
+    ]
+  ]
+
+  set number-task0 0
+  set number-task1 0
+
+  ask brains [
+    if mytask = 0 [
+      set number-task0 number-task0 + 1
+    ]
+
+    if mytask = 1 [
+      set number-task1 number-task1 + 1
+    ]
+  ]
+
+  set alpha 0.15
 
 end
 
@@ -287,6 +323,9 @@ to go
     ]
     Algo = "Gossip" [
       GOSSIP
+    ]
+    Algo = "Estimation-adjustment" [
+      ESTIMATION-ADJUSTMENT
   ])
 
   set error-value 0
@@ -304,6 +343,7 @@ to go
   ]
 
 end
+
 to stats
 
 
@@ -388,6 +428,109 @@ to PROBABILISTIC-update-target [myTarget receinved-info-tasks]
 
 end
 ;;;;;;;;;;;;;;;;;;;;;;; END PROBABILISTIC ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;;;;;;;;;;;;;;;;;; ESTIMATION-ADJUSTMENT ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to ESTIMATION-ADJUSTMENT
+  while [alpha > 0][
+    iterate
+    tick
+  ]
+end
+
+to observe
+  ask brains [
+    let lst old-estimation-tasks
+
+    ask link-neighbors [
+      let i 0
+      while [i < length lst][
+        let n1 item i lst
+        let n2 item i old-estimation-tasks
+        set lst replace-item i lst (n1 + n2)
+
+        set i i + 1
+      ]
+    ]
+
+    let i 0
+    let s 0
+    while [i < length lst][
+      let n item i lst
+      set s s + n
+      set i i + 1
+    ]
+
+    set i 0
+    while [i < length lst][
+      let n item i lst
+      set lst replace-item i lst (n / s)
+      set i i + 1
+    ]
+
+    set estimation-tasks lst
+    set old-estimation-tasks estimation-tasks
+  ]
+
+end
+
+to adjust-task
+  if mytask = 0 [
+    if item 0 estimation-tasks > task-repartition [
+      let r random-float 1
+      if r < alpha [
+        set mytask 1
+        set color red
+      ]
+    ]
+  ]
+
+  if mytask = 1 [
+    if item 1 estimation-tasks > (1 - task-repartition) [
+      let r random-float 1
+      if r < alpha [
+        set mytask 0
+        set color blue
+      ]
+    ]
+  ]
+
+end
+
+to iterate
+  set alpha alpha - 0.01
+
+  repeat int(number-brains / 3) [
+    observe
+  ]
+
+  ask brains [
+    adjust-task
+  ]
+
+  ask brains [
+    set estimation-tasks list 0 0
+    set estimation-tasks replace-item mytask estimation-tasks 1
+    set old-estimation-tasks estimation-tasks
+  ]
+
+  set number-task0 0
+  set number-task1 0
+
+  ask brains [
+    if mytask = 0 [
+      set number-task0 number-task0 + 1
+    ]
+
+    if mytask = 1 [
+      set number-task1 number-task1 + 1
+    ]
+  ]
+
+end
+
+;;;;;;;;;;;;;;;;;;;;;;; END ESTIMATION-ADJUSTMENT ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 ;;;;;;;;;;;;;;;;;; DETERMINISTIC ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -941,8 +1084,8 @@ SLIDER
 number-brains
 number-brains
 0
-10000
-40.0
+1000
+100.0
 1
 1
 NIL
@@ -957,7 +1100,7 @@ number-connections
 number-connections
 0
 1000
-52.0
+168.0
 1
 1
 NIL
@@ -997,8 +1140,8 @@ CHOOSER
 109
 Algo
 Algo
-"Probabilistic" "Deterministic" "Gossip"
-2
+"Probabilistic" "Deterministic" "Gossip" "Estimation-adjustment"
+3
 
 SWITCH
 394
@@ -1054,7 +1197,7 @@ new-task-number
 new-task-number
 0
 1000
-10.0
+74.0
 1
 1
 NIL
@@ -1295,7 +1438,6 @@ Si initialize-gossip est désactivé, seul un noeud (choisit au hasard on par le
 
 
 Pour la suite on se supposera que initialize-gossip est activé et que les noeuds ont une tâche assignée au hasard dès le départ. Pour la suite, on assignera 2 types de tâche aux noeuds qui seront répartis uniforméments. (Pour 60 agents on aura 30 tâches de chaque types)
-
 
 @#$#@#$#@
 default
