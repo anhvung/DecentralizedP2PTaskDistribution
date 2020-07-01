@@ -1312,10 +1312,10 @@ record-stats
 -1000
 
 MONITOR
-1175
-602
-1395
-647
+1244
+549
+1464
+594
 ERROR (pourcentage)
 error-value * 100
 17
@@ -1323,10 +1323,10 @@ error-value * 100
 11
 
 PLOT
-1174
-423
-1396
-590
+1243
+370
+1465
+537
 ERROR (pourcentage)
 NIL
 NIL
@@ -1529,21 +1529,11 @@ Pour les algorithmes probabilistic, deterministic et gossip (si initialize-all-g
 1
 
 TEXTBOX
-1181
-655
-1348
-706
+1250
+602
+1417
+653
 Erreur :\nMoyenne des erreurs relatives par type de tâche en pourcentage
-11
-0.0
-1
-
-TEXTBOX
-1598
-536
-1748
-554
-PAF
 11
 0.0
 1
