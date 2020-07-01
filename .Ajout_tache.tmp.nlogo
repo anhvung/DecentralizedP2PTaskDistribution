@@ -481,15 +481,15 @@ to process-both [myTarget me];update both sender and receiver data and update th
 
   GOSSIP-prepareData me   ; preparation des donnees a echanger
 
-  GOSSIP-updateData myTarget me ;envoi et mise a jour des donnees
+  GOSSIP-updateData myTarget me
 
-  GOSSIP-updateTask myTarget   ;mise a jour si necessaire des taches (couleurs)
+  GOSSIP-updateTask myTarget
 
 
 
 end
 
-to GOSSIP-prepareData [mybrain] ;Si prb
+to GOSSIP-prepareData [mybrain]
   ask mybrain[
     let myWho who
     let k 0

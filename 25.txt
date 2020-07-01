@@ -1,0 +1,12 @@
+Gossip;small word;60;14
+Gossip;small word;60;147
+Gossip;small word;60;181
+Gossip;small word;60;234
+Gossip;small word;60;12
+Gossip;small word;60;17
+Gossip;small word;60;78
+Gossip;small word;60;305
+Gossip;small word;60;104
+Gossip;small word;60;455
+Gossip;small word;60;180
+Gossip;small word;60;71
