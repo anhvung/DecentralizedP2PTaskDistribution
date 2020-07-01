@@ -1180,6 +1180,23 @@ false
 PENS
 "default" 1.0 0 -16777216 true "" "plot error-value * 100\n"
 
+BUTTON
+17
+264
+189
+297
+CLEAR-ALL  (Reset tests)
+CLEAR-ALL 
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
 @#$#@#$#@
 ## WHAT IS IT?
 
