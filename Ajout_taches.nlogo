@@ -42,7 +42,8 @@ to add-task
 
   if number-of-types = 0 [ ;; initialisation au début du programme
     set task-list list (0)(0) ;; à l'indice i se trouve le nombre de brains nécéssaires pour la tache i
-    set color-list list color-list [red blue grey orange brown yellow green lime turquoise cyan sky blue violet magenta pink] ;; à l'indice i se trouve la couleur associée à la tache i
+    set color-list [red blue grey orange brown yellow green lime turquoise cyan sky blue violet magenta pink] ;; à l'indice i se trouve la couleur associée à la tache i
+    print(color-list)
     set total-number-of-task 0
   ]
 
@@ -77,6 +78,7 @@ to reset-task
   set total-number-of-task 0
   set number-of-types 0
   set color-list list color-list [red blue grey orange brown yellow green lime turquoise cyan sky blue violet magenta pink] ;; à l'indice i se trouve la couleur associée à la tache i
+
   print(task-list)
 end
 
@@ -960,7 +962,7 @@ CHOOSER
 Graph-type
 Graph-type
 "fully connected" "graph" "tree" "small word"
-1
+2
 
 BUTTON
 238
@@ -1043,7 +1045,7 @@ new-task-number
 new-task-number
 0
 1000
-80.0
+138.0
 1
 1
 NIL
