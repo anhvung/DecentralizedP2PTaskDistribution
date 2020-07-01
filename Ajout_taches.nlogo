@@ -84,19 +84,19 @@ to setup-task-and-graph
 
   setup-graph
 
-   ifelse number-of-types < 1 [ ;; si aucune tache n'a étée ajouté avant le setup on ne peut pas faire le setup
+  ifelse number-of-types < 1 [ ;; si aucune tache n'a étée ajouté avant le setup on ne peut pas faire le setup
     print("You must add at least two tasks !")
   ]
   [
-  (ifelse Algo = "Probabilistic" [
-    setup-probabilistic
-    ]
-    Algo = "Deterministic" [
-      setup-deterministic
-    ]
-    Algo = "Gossip" [
-      setup-gossip
-  ])
+    (ifelse Algo = "Probabilistic" [
+      setup-probabilistic
+      ]
+      Algo = "Deterministic" [
+        setup-deterministic
+      ]
+      Algo = "Gossip" [
+        setup-gossip
+    ])
   ]
 
   reset-ticks
@@ -143,11 +143,11 @@ to setup-deterministic
 
   let info []
   let i 0
-    while[i < number-of-types][
-      let ntask (item i task-list)
-      set info insert-item 0 info ntask
-      set i i + 1
-    ]
+  while[i < number-of-types][
+    let ntask (item i task-list)
+    set info insert-item 0 info ntask
+    set i i + 1
+  ]
   ask one-of brains [
     set color yellow
     set contains-update-agent 1
@@ -159,10 +159,10 @@ end
 to setup-gossip
   set globalTasks []
   let i 0
-    while[i < number-of-types][
-      set globalTasks lput item i task-list globalTasks
-      set i i + 1
-    ]
+  while[i < number-of-types][
+    set globalTasks lput item i task-list globalTasks
+    set i i + 1
+  ]
 
 
 
@@ -266,7 +266,7 @@ to stats
 
   ifelse error-value = 0 [
     set  convergence convergence + 1
-    if convergence = 50 and  number-tests < 100 [
+    if convergence = (max list 50 number-brains ) and  number-tests < 100 [
 
       file-type Algo  file-type ";" file-type Graph-type  file-type ";" file-type number-brains  file-type ";" file-print (ticks - 50)
       type "Saved " type number-tests type " " type Algo type " " type Graph-type type " " type number-brains type " " print (ticks - 50)
@@ -275,6 +275,9 @@ to stats
       set number-tests number-tests + 1
 
       setup-task-and-graph
+    ]
+    if number-tests = 100 [
+      stop
     ]
   ][
     set  convergence 0
@@ -305,10 +308,10 @@ to PROBABILISTIC-update-target [myTarget receinved-info-tasks]
 
   let myptask []
   let i 0
-    while[i < number-of-types][
-      set myptask insert-item i myptask (item i receinved-info-tasks)
-      set i i + 1
-    ]
+  while[i < number-of-types][
+    set myptask insert-item i myptask (item i receinved-info-tasks)
+    set i i + 1
+  ]
 
 
   ifelse myTarget != nobody[ ; au cas ou s'il n'y a pas de voisin
@@ -321,9 +324,9 @@ to PROBABILISTIC-update-target [myTarget receinved-info-tasks]
 
       if available = 0 [ ; S'il n'est pas en train de traiter une task
 
-      let choix random-float 1
-      let total 0
-      let k 0
+        let choix random-float 1
+        let total 0
+        let k 0
         while[k < number-of-types][
           set total total + item k info-tasks
           if choix <= total and choix > total - item k info-tasks[
@@ -381,37 +384,37 @@ to DETERMINISTIC-update-target [myTarget receinved-info-tasks]
   print("info-tasks")
   print(receinved-info-tasks)
 
-    ifelse myTarget != nobody[ ; au cas ou s'il n'y a pas de voisin
-      ask myTarget[
-        let n length receinved-info-tasks
-        let i 0
-        let done false
-        if available = 0 [ ; S'il n'est pas en train de traiter une task
-          while [(done = false) and (i < n)] [
-            ifelse (item i receinved-info-tasks) > 0 [
-              set mytask i + 1
-              set color item i color-list
-              set available 1
-              set done true
-            ][
-              set i i + 1
-            ]
-          ]
-        ]
-        set info-tasks []
-        let j 1
-        while [j <= n] [
-          let myntask item (n - j) receinved-info-tasks
-          ifelse (n - j = i) and (done = true) [
-            set info-tasks insert-item 0 info-tasks (myntask - 1)
+  ifelse myTarget != nobody[ ; au cas ou s'il n'y a pas de voisin
+    ask myTarget[
+      let n length receinved-info-tasks
+      let i 0
+      let done false
+      if available = 0 [ ; S'il n'est pas en train de traiter une task
+        while [(done = false) and (i < n)] [
+          ifelse (item i receinved-info-tasks) > 0 [
+            set mytask i + 1
+            set color item i color-list
+            set available 1
+            set done true
           ][
-            set info-tasks insert-item 0 info-tasks myntask
+            set i i + 1
           ]
-          set j j + 1
         ]
       ]
+      set info-tasks []
+      let j 1
+      while [j <= n] [
+        let myntask item (n - j) receinved-info-tasks
+        ifelse (n - j = i) and (done = true) [
+          set info-tasks insert-item 0 info-tasks (myntask - 1)
+        ][
+          set info-tasks insert-item 0 info-tasks myntask
+        ]
+        set j j + 1
+      ]
     ]
-    [print "no voisin !!!"]
+  ]
+  [print "no voisin !!!"]
 
 
 end
@@ -527,109 +530,109 @@ to GOSSIP-updateData [myTarget myBrain]
 
 end
 to GOSSIP-updateTask [myTarget]
+  if myTarget != nobody[
+    ask myTarget [
 
-  ask myTarget [
+      let newInfoList []
+      let maxTime 0
+      let myIdInList 0
+      let myStatus 0
+      let myTimeStamp 0
 
-    let newInfoList []
-    let maxTime 0
-    let myIdInList 0
-    let myStatus 0
-    let myTimeStamp 0
+      let i 0
+      while [i != length LbrainId ][
 
-    let i 0
-    while [i != length LbrainId ][
+        let tmp-time 0
+        let tmp-list []
 
-      let tmp-time 0
-      let tmp-list []
-
-      if item i LbrainId = who [
-        set myIdInList  i
-      ]
-      set tmp-time item i Ltimestamp
-      set tmp-list item i Ltaskslist
-
-
-      if tmp-time > maxTime and length tmp-list > 0[
-        set maxTime tmp-time
-        set newInfoList tmp-list
-      ]
-      set i i + 1
-    ]
+        if item i LbrainId = who [
+          set myIdInList  i
+        ]
+        set tmp-time item i Ltimestamp
+        set tmp-list item i Ltaskslist
 
 
-    ;weuifhweiopfhuasioufaswofaswugfhuioawf
-    set myStatus item myIdInList Lstatus
-    set myTimeStamp item myIdInList Ltimestamp
-
-    let taskstates map [ netlogoctropnul -> 0 ] globalTasks ;newInfoList
-    foreach Lstatus [
-      x ->
-
-      if x >= 0 [
-        set taskstates replace-item x taskstates (( item x taskstates ) + 1)
+        if tmp-time > maxTime and length tmp-list > 0[
+          set maxTime tmp-time
+          set newInfoList tmp-list
+        ]
+        set i i + 1
       ]
 
-    ]
 
-    ; set taskstates ( map [ [ currentvalue maxvalue ] -> maxvalue - currentvalue ] taskstates newInfoList)
-    ;print taskstates
+      ;weuifhweiopfhuasioufaswofaswugfhuioawf
+      set myStatus item myIdInList Lstatus
+      set myTimeStamp item myIdInList Ltimestamp
 
-    let pourcentage 0
-    ifelse 0 = (item 1 taskstates) +  (item 0 taskstates) [
-      set refreshlimit 0
-    ][
-      set pourcentage min list (item 0 taskstates /( (item 1 taskstates) +  (item 0 taskstates)))  (item 1 taskstates /( (item 1 taskstates) +  (item 0 taskstates)))
-      ;set refreshlimit (75 * pourcentage * pourcentage ) - (17.5 * pourcentage)
-      ; set refreshlimit ((exp (10 * pourcentage)) - 1)
+      let taskstates map [ netlogoctropnul -> 0 ] globalTasks ;newInfoList
+      foreach Lstatus [
+        x ->
 
-
-    ]
-
-
-
-
-    set refreshrate refreshrate + 1
-
-    set taskstates ( map [ [a b] -> a - b ] globalTasks taskstates)
-
-
-
-   ; if refreshrate > 0 and ( random ((length Lstatus)* (log (length Lstatus) 2)) < 1 )[
-    if refreshrate > 0 and ( random ((length Lstatus)) < 1 )[
-
-
-      set refreshrate 0
-      ;set refreshlimit one-of [8 9 10] * (pourcentage * 10 )
-
-      let j 0
-      let newTask -1
-      let tmpValue 0
-      while [j != length taskstates][
-
-
-        if item j taskstates > tmpValue [
-          set tmpValue item j taskstates
-          set newTask j
+        if x >= 0 [
+          set taskstates replace-item x taskstates (( item x taskstates ) + 1)
         ]
 
-        set j j + 1
-      ];end while
-      if  newTask != -1 and  newTask != mytask [
+      ]
 
+      ; set taskstates ( map [ [ currentvalue maxvalue ] -> maxvalue - currentvalue ] taskstates newInfoList)
+      ;print taskstates
 
-        set color item newTask color-list
-        set myStatus newTask
-
-
-
-        set mytask newTask
-
+      let pourcentage 0
+      ifelse 0 = (item 1 taskstates) +  (item 0 taskstates) [
+        set refreshlimit 0
+      ][
+        set pourcentage min list (item 0 taskstates /( (item 1 taskstates) +  (item 0 taskstates)))  (item 1 taskstates /( (item 1 taskstates) +  (item 0 taskstates)))
+        ;set refreshlimit (75 * pourcentage * pourcentage ) - (17.5 * pourcentage)
+        ; set refreshlimit ((exp (10 * pourcentage)) - 1)
 
 
       ]
 
 
-    ];end if
+
+
+      set refreshrate refreshrate + 1
+
+      set taskstates ( map [ [a b] -> a - b ] globalTasks taskstates)
+
+
+
+      ; if refreshrate > 0 and ( random ((length Lstatus)* (log (length Lstatus) 2)) < 1 )[
+      if refreshrate > 0 and ( random (5 * (length Lstatus)) < 1 )[
+
+
+        set refreshrate 0
+        ;set refreshlimit one-of [8 9 10] * (pourcentage * 10 )
+
+        let j 0
+        let newTask -1
+        let tmpValue 0
+        while [j != length taskstates][
+
+
+          if item j taskstates > tmpValue [
+            set tmpValue item j taskstates
+            set newTask j
+          ]
+
+          set j j + 1
+        ];end while
+        if  newTask != -1 and  newTask != mytask [
+
+
+          set color item newTask color-list
+          set myStatus newTask
+
+
+
+          set mytask newTask
+
+
+
+        ]
+
+
+      ];end if
 
 
 
@@ -637,13 +640,13 @@ to GOSSIP-updateTask [myTarget]
 
 
 
-    set Lstatus   replace-item myIdInList Lstatus  (myStatus)
-    set Ltaskslist    replace-item myIdInList Ltaskslist   (newInfoList)
-    set Ltimestamp    replace-item myIdInList Ltimestamp   (ticks)
+      set Lstatus   replace-item myIdInList Lstatus  (myStatus)
+      set Ltaskslist    replace-item myIdInList Ltaskslist   (newInfoList)
+      set Ltimestamp    replace-item myIdInList Ltimestamp   (ticks)
 
-    ;;set info-tasks newInfoList
+      ;;set info-tasks newInfoList
 
-  ]
+  ]]
 
 end
 
