@@ -331,26 +331,37 @@ to go
       DETERMINISTIC
     ]
     Algo = "Gossip" [
-      GOSSIP
+        GOSSIP
+      ]
+      Algo = "Estimation-adjustment" [
+        ESTIMATION-ADJUSTMENT
+    ])
+
+
+    ifelse Algo ="Deterministic" [
+
+      set error-value 0
+      let indi 0
+      while[indi < number-of-types][
+
+        set error-value error-value + (abs (item indi task-list - count brains with [color = item indi color-list]) / item indi task-list )
+        print red = item indi color-list
+        print count brains with [color = item indi color-list]
+        print item indi task-list
+        print indi
+
+
+        set indi indi + 1
+      ]
+
+
+      set error-value error-value / number-of-types
+      if record-stats
+      [
+        stats
+      ]
     ]
-    Algo = "Estimation-adjustment" [
-      ESTIMATION-ADJUSTMENT
-  ])
 
-  set error-value 0
-  let indi 0
-  while[indi < number-of-types][
-    set error-value error-value + (abs (item indi task-list - count brains with [color = item indi color-list]) / item indi task-list )
-
-    set indi indi + 1
-  ]
-
-
-  set error-value error-value / number-of-types
-  if record-stats
-  [
-    stats
-  ]
   ]
   [
     user-message ("Please enter at least 2 types")
@@ -1214,7 +1225,7 @@ new-task-number
 new-task-number
 0
 1000
-83.0
+37.0
 1
 1
 NIL
