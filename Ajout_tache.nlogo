@@ -629,7 +629,7 @@ to GOSSIP-updateTask [myTarget]
 
 
       ; if refreshrate > 0 and ( random ((length Lstatus)* (log (length Lstatus) 2)) < 1 )[
-      if refreshrate > 0 and ( random ((length Lstatus)) < 1 )[  ; on a une chance inverse a la longeur du reseau connu de changer d etat
+      if refreshrate > 0 and ( ((0.3858 * (length Lstatus)) - 2.4905 ) * random ((length Lstatus)) < 1 )[  ; on a une chance inverse a la longeur du reseau connu de changer d etat
 
 
         set refreshrate 0
