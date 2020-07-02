@@ -1655,7 +1655,7 @@ TEXTBOX
 # TUTORIEL
 
 
-[CLIQUER POUR VOIR LE TUTORIEL](https://docs.google.com/document/d/1kP-bbcegr0l-avVXos6BxKUSfCFzBU7F-MAvanF6M4c/edit#heading=h.2gazcsgmxkub)
+[CLIQUER POUR VOIR LE TUTORIEL]()
 
 # Autre
 
@@ -1676,10 +1676,12 @@ A partir de cette arbre, on répète c - n + 1 fois l’opération suivante : ch
 
 Le graphe obtenu n’est pas parfaitement aléatoire (car il est construit à partir d’un arbre) mais pour l’utilisation que nous en ferons ce sera une approximation satisfaisante.
 
+## Algorithme par estimation de la distribution de tâches et ajustement (Estimation-adjustment)
 
+L’idée de cet algorithme est de faire estimer à chaque noeud la répartition globale des tâches sur tout le graphe. Pour cela, on suppose que chaque noeud connaît la répartition de tâches à atteindre (et, pour simplifier, on se limite ici à 2 tâches différentes). Par exemple, on peut vouloir 30 % de tâche 1 dans le réseau, et 70 % de tâche 2, et chaque noeud a connaissance de cet objectif. On appellera cela la “loi de répartition”. Chaque noeud n possède un attribut, [xn yn], qui correspond à son estimation propre de la répartition dans le graphe : ce noeud estime qu’il y a une proportion x de tâche 1, et une proportion y de tâche 2.
 
-Algorithme probabiliste (probabilistic) 
-	Dans cet algorithme de base les agents vont choisir leur tâche au hasard avec une probabilité correspondante à la répartition des types de tâche.
+## Algorithme probabiliste (probabilistic) 
+Dans cet algorithme de base les agents vont choisir leur tâche au hasard avec une probabilité correspondante à la répartition des types de tâche.
 En le testant les résultats sont plus précis avec la taille du réseaux. Concrètement cela signifie que l’écart-type diminue avec le nombre d’agents.
 
 
