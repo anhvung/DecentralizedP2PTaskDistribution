@@ -31,7 +31,7 @@ to setup-graph
 
   set convergence 0
 
-  file-open ".txt"
+  file-open "stats.txt"
   reset-ticks
 
 end
@@ -1128,7 +1128,7 @@ number-agents
 number-agents
 0
 1000
-30.0
+100.0
 1
 1
 NIL
@@ -1184,7 +1184,7 @@ CHOOSER
 Algo
 Algo
 "Probabilistic" "Deterministic" "Gossip" "Estimation-adjustment"
-0
+1
 
 SWITCH
 929
@@ -1193,7 +1193,7 @@ SWITCH
 645
 initialize-all-gossip
 initialize-all-gossip
-1
+0
 1
 -1000
 
@@ -1240,7 +1240,7 @@ new-task-number
 new-task-number
 0
 1000
-15.0
+50.0
 1
 1
 NIL
@@ -1350,7 +1350,7 @@ SWITCH
 645
 record-stats
 record-stats
-0
+1
 1
 -1000
 
@@ -1407,7 +1407,7 @@ SWITCH
 645
 leader-designation
 leader-designation
-0
+1
 1
 -1000
 
@@ -1678,6 +1678,9 @@ Le graphe obtenu n’est pas parfaitement aléatoire (car il est construit à pa
 
 
 
+Algorithme probabiliste (probabilistic) 
+	Dans cet algorithme de base les agents vont choisir leur tâche au hasard avec une probabilité correspondante à la répartition des types de tâche.
+En le testant les résultats sont plus précis avec la taille du réseaux. Concrètement cela signifie que l’écart-type diminue avec le nombre d’agents.
 
 
 ## ALGORITHME DETERMINISTIQUE
