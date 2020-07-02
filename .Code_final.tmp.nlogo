@@ -31,7 +31,7 @@ to setup-graph
 
   set convergence 0
 
-  file-open "30.txt"
+  file-open ".txt"
   reset-ticks
 
 end
@@ -364,10 +364,7 @@ to go
       while[indi < number-of-types][
 
         set error-value error-value + (abs (item indi task-list - count brains with [color = item indi color-list]) / item indi task-list )
-        print red = item indi color-list
-        print count brains with [color = item indi color-list]
-        print item indi task-list
-        print indi
+
 
 
         set indi indi + 1
@@ -1131,7 +1128,7 @@ number-agents
 number-agents
 0
 1000
-208.0
+30.0
 1
 1
 NIL
@@ -1177,7 +1174,7 @@ CHOOSER
 Graph-type
 Graph-type
 "fully connected" "random" "tree" "small word"
-2
+3
 
 CHOOSER
 6
@@ -1187,7 +1184,7 @@ CHOOSER
 Algo
 Algo
 "Probabilistic" "Deterministic" "Gossip" "Estimation-adjustment"
-1
+0
 
 SWITCH
 929
@@ -1196,7 +1193,7 @@ SWITCH
 645
 initialize-all-gossip
 initialize-all-gossip
-0
+1
 1
 -1000
 
@@ -1243,7 +1240,7 @@ new-task-number
 new-task-number
 0
 1000
-37.0
+15.0
 1
 1
 NIL
@@ -1353,7 +1350,7 @@ SWITCH
 645
 record-stats
 record-stats
-1
+0
 1
 -1000
 
@@ -1410,7 +1407,7 @@ SWITCH
 645
 leader-designation
 leader-designation
-1
+0
 1
 -1000
 

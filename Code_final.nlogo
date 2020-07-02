@@ -31,7 +31,7 @@ to setup-graph
 
   set convergence 0
 
-  file-open "30.txt"
+  file-open "stats.txt"
   reset-ticks
 
 end
@@ -1128,7 +1128,7 @@ number-agents
 number-agents
 0
 1000
-208.0
+100.0
 1
 1
 NIL
@@ -1174,7 +1174,7 @@ CHOOSER
 Graph-type
 Graph-type
 "fully connected" "random" "tree" "small word"
-2
+3
 
 CHOOSER
 6
@@ -1240,7 +1240,7 @@ new-task-number
 new-task-number
 0
 1000
-37.0
+50.0
 1
 1
 NIL
